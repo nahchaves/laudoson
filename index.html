@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador Automatizado de Laudos Neuropsicológicos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 15mm !important;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0b1120;
+      color: #000000;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Container do Laudo */
+    .document-wrapper {
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+      padding: 15mm;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      border-radius: 4px;
+      color: #000000;
+      position: relative;
+    }
+
+    /* Quebra forçada de página */
+    .page-break-top {
+      page-break-before: always !important;
+      break-before: page !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    .cover-page {
+      min-height: 250mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: center;
+    }
+
+    .contracapa-page {
+      min-height: 250mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Tipografia de Baixa Visão / Alto Contraste */
+    .doc-content p {
+      font-size: 11.5pt;
+      line-height: 1.48;
+      text-align: justify;
+      margin-bottom: 7px;
+      color: #000000;
+      font-weight: 450;
+      letter-spacing: 0.01em;
+    }
+
+    .doc-content li {
+      font-size: 11pt;
+      line-height: 1.42;
+      color: #000000;
+      text-align: justify;
+      margin-bottom: 4px;
+    }
+
+    .doc-content ul {
+      list-style-type: disc;
+      padding-left: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    .main-heading {
+      font-size: 13.5pt;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #000000;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      padding-bottom: 3px;
+      border-bottom: 2px solid #000000;
+      page-break-after: avoid !important;
+      break-after: avoid !important;
+    }
+
+    .sub-heading {
+      font-size: 12pt;
+      font-weight: 800;
+      color: #042f2e;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      page-break-after: avoid !important;
+      break-after: avoid !important;
+    }
+
+    .sub-heading::before {
+      content: "";
+      display: inline-block;
+      width: 5px;
+      height: 14px;
+      background-color: #0f766e;
+      border-radius: 2px;
+    }
+
+    .content-block {
+      margin-bottom: 8px;
+    }
+
+    /* Tabelas */
+    table.laudo-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px 0;
+      font-size: 10.5pt;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    table.laudo-table th, table.laudo-table td {
+      border: 1.5px solid #334155;
+      padding: 5px 8px;
+      text-align: left;
+      vertical-align: middle;
+      line-height: 1.3;
+      color: #000000;
+    }
+
+    table.laudo-table th {
+      background-color: #e2e8f0;
+      font-weight: 800;
+      color: #000000;
+      text-align: center;
+      border-bottom: 2px solid #000000;
+      font-size: 11pt;
+    }
+
+    table.laudo-table td.center {
+      text-align: center;
+    }
+
+    .disclaimer-card {
+      background-color: #f1f5f9;
+      border: 1.5px solid #94a3b8;
+      border-left: 5px solid #0f766e;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-size: 10.5pt;
+      line-height: 1.4;
+      color: #0f172a;
+      text-align: justify;
+    }
+
+    .info-card {
+      background-color: #f8fafc;
+      border: 1.5px solid #94a3b8;
+      border-left: 5px solid #000000;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-size: 11pt;
+      line-height: 1.45;
+      color: #000000;
+    }
+
+    .print-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1.5px solid #64748b;
+      padding-bottom: 3px;
+      margin-bottom: 8px;
+      font-size: 9pt;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .print-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1.5px solid #cbd5e1;
+      padding-top: 4px;
+      margin-top: 10px;
+      font-size: 9pt;
+      font-weight: 600;
+      color: #334155;
+      page-break-inside: avoid;
+    }
+
+    .digital-signature-container {
+      border: 1.5px dashed #475569;
+      border-radius: 6px;
+      background: #f8fafc;
+      min-height: 95px;
+      width: 400px;
+      max-width: 100%;
+      margin: 0 auto 8px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    /* Ocultar painel de edição na impressão */
+    @media print {
+      body {
+        background: #ffffff !important;
+      }
+      .no-print, #editor-sidebar {
+        display: none !important;
+      }
+      #preview-pane {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .document-wrapper {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+      .cover-page, .contracapa-page {
+        min-height: auto !important;
+        height: auto !important;
+      }
+      .page-break-top {
+        page-break-before: always !important;
+        break-before: page !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col">
+
+  <!-- BARRA DE TOPO -->
+  <header class="no-print bg-slate-900 border-b border-slate-800 text-white px-6 py-2.5 flex items-center justify-between shrink-0 z-50">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded bg-teal-600 flex items-center justify-center font-bold text-white text-lg">
+        Ψ
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-wide text-slate-100">Painel de Geração Automática de Laudos</h1>
+        <p class="text-xs text-teal-400">Cole o texto bruto ao lado &bull; O laudo formata sozinho</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button onclick="carregarExemplo()" class="px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition">
+        Carregar Modelo Preenchido
+      </button>
+      <button onclick="limparCampos()" class="px-3 py-1.5 text-xs font-semibold rounded bg-rose-900/60 hover:bg-rose-900 text-rose-200 border border-rose-700 transition">
+        Limpar
+      </button>
+      <button onclick="window.print()" class="px-5 py-2 text-sm font-bold rounded bg-teal-500 hover:bg-teal-400 text-slate-950 flex items-center gap-2 shadow transition active:scale-95 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Imprimir / Gerar PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- ÁREA DE TRABALHO: EDITOR + PREVIEW -->
+  <main class="flex-1 flex overflow-hidden">
+    
+    <!-- BARRA LATERAL COM OS CAMPOS DE TEXTO BRUTO -->
+    <aside id="editor-sidebar" class="w-2/5 min-w-[380px] max-w-[520px] bg-slate-900 text-slate-200 p-5 overflow-y-auto border-r border-slate-800 space-y-4">
+      
+      <div class="border-b border-slate-700 pb-2">
+        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">1. Dados do Paciente</h2>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-medium text-slate-400 block mb-1">Nome Completo do Paciente</label>
+          <input type="text" id="in_nome" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: Maria das Graças">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs font-medium text-slate-400 block mb-1">Data de Nascimento</label>
+            <input type="text" id="in_nascimento" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="DD/MM/AAAA">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-slate-400 block mb-1">Idade Cronológica</label>
+            <input type="text" id="in_idade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: 35 anos">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 block mb-1">Finalidade da Avaliação</label>
+          <input type="text" id="in_finalidade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: Delinear perfil neuropsicológico...">
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-400 block mb-1">Data e Local de Emissão</label>
+          <input type="text" id="in_data_emissao" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: Rio Branco, Acre, 19 de outubro de 2026">
+        </div>
+      </div>
+
+      <div class="border-b border-slate-700 pt-3 pb-2">
+        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">2. Textos Brutos das Seções</h2>
+        <p class="text-[11px] text-slate-400">Separe parágrafos dando Enter. Para listas com marcadores, inicie a linha com "- " ou "* ".</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1">3. Descrição da Demanda</label>
+          <textarea id="in_demanda" rows="4" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole o texto da demanda..."></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1">5.1 Apresentação Durante a Avaliação</label>
+          <textarea id="in_apresentacao" rows="4" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole o texto da apresentação..."></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1">5.8 Personalidade e Comportamento / Escalas</label>
+          <textarea id="in_personalidade" rows="5" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole a análise de comportamento, Pfister, HTP, BDEFS..."></textarea>
+        </div>
+
+        <div class="bg-teal-950/40 p-3 rounded border border-teal-800">
+          <label class="text-xs font-bold text-teal-300 block mb-1">6. Conclusão Clínica (Página Nova Automática)</label>
+          <textarea id="in_conclusao" rows="6" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole a conclusão clínica..."></textarea>
+          
+          <label class="text-xs font-bold text-teal-300 block mt-2 mb-1">Diagnóstico / CID-11 em Destaque</label>
+          <input type="text" id="in_cid" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Ex: CID-11: 6A05.0 – Transtorno do Déficit de Atenção...">
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-slate-300 block mb-1">7. Encaminhamentos</label>
+          <textarea id="in_encaminhamentos" rows="5" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="1. Acompanhamento psicológico...&#10;2. Avaliação médica..."></textarea>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PREVIEW AO VIVO DO LAUDO (DIREITA) -->
+    <section id="preview-pane" class="flex-1 bg-slate-950 overflow-y-auto p-8 flex justify-center">
+      
+      <div class="document-wrapper doc-content">
+
+        <!-- ============================================== -->
+        <!-- PÁGINA 1: CAPA                                 -->
+        <!-- ============================================== -->
+        <div class="cover-page">
+          <div class="pt-8 flex flex-col items-center">
+            <!-- Logotipo Helenara Chaves -->
+            <svg class="h-28 w-auto" viewBox="0 0 450 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="20" x2="35" y2="140" stroke="#000000" stroke-width="3.5"/>
+              <line x1="15" y1="62" x2="190" y2="62" stroke="#000000" stroke-width="3.5"/>
+              <text x="45" y="52" font-family="'Cinzel', serif" font-size="34" font-weight="700" fill="#000000" letter-spacing="4">HELENARA</text>
+              <path d="M290 54 C350 42, 385 58, 305 76 C265 85, 250 98, 300 90 C340 84, 380 72, 360 84" stroke="#000000" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <text x="310" y="80" font-family="'Brush Script MT', 'Great Vibes', cursive" font-size="34" font-style="italic" fill="#000000">Chaves</text>
+              <text x="48" y="105" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#0f172a" letter-spacing="2">PSICÓLOGA CLÍNICA E</text>
+              <text x="48" y="125" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#0f172a" letter-spacing="2">NEUROPSICÓLOGA CRP 24/02216</text>
+            </svg>
+            <div class="w-24 h-1.5 bg-teal-700 mt-4"></div>
+          </div>
+
+          <div class="my-auto py-12">
+            <h1 class="text-4xl font-extrabold tracking-tight text-black uppercase mb-3" style="font-family: 'Cinzel', serif;">
+              LAUDO PSICOLÓGICO
+            </h1>
+            <h2 class="text-2xl font-bold tracking-widest text-teal-900 uppercase" style="font-family: 'Cinzel', serif;">
+              AVALIAÇÃO NEUROPSICOLÓGICA
+            </h2>
+          </div>
+
+          <div class="pb-6 text-center space-y-1">
+            <p class="text-black font-extrabold text-[12pt] text-center m-0">Helenara Maria da Silva Mendes Chaves</p>
+            <p class="text-slate-900 font-bold text-[11pt] text-center m-0">Psicóloga – Conselho Federal de Psicologia da Regional 24/02216</p>
+            <p class="text-slate-800 font-bold text-[11pt] text-center m-0">Rio Branco – Acre</p>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- PÁGINA 2: IDENTIFICAÇÃO                        -->
+        <!-- ============================================== -->
+        <div class="page-break-top contracapa-page">
+          <div>
+            <div class="print-header">
+              <span>HELENARA CHAVES</span>
+              <span>PSICÓLOGA CLÍNICA E NEUROPSICÓLOGA CRP 24/02216</span>
+            </div>
+
+            <div class="main-heading" style="margin-top: 0;">
+              1. IDENTIFICAÇÃO PROFISSIONAL
+            </div>
+            <div class="info-card">
+              <p class="m-0"><strong>Nome:</strong> Helenara Maria da Silva Mendes Chaves</p>
+              <p class="m-0"><strong>Conselho:</strong> Psicóloga – Conselho Federal de Psicologia da Regional 24/02216</p>
+              <p class="m-0"><strong>Localidade:</strong> Rio Branco – Acre</p>
+              <p class="m-0"><strong>E-mail:</strong> nahpsicologiachaves@gmail.com</p>
+              <p class="m-0"><strong>Telefone:</strong> (68) 99216-1717</p>
+            </div>
+
+            <div class="main-heading" style="margin-top: 14px;">
+              2. IDENTIFICAÇÃO DO PACIENTE
+            </div>
+            <div class="info-card">
+              <p class="m-0"><strong>Nome:</strong> <span id="out_nome">---</span></p>
+              <p class="m-0"><strong>Data de Nascimento:</strong> <span id="out_nascimento">---</span></p>
+              <p class="m-0"><strong>Idade cronológica:</strong> <span id="out_idade">---</span></p>
+              <p class="m-0"><strong>Finalidade:</strong> <span id="out_finalidade">---</span></p>
+            </div>
+          </div>
+
+          <div class="print-footer">
+            <span>Laudo Neuropsicológico • <span class="out_nome_short">Paciente</span></span>
+            <span>Página 2</span>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- PÁGINA 3 EM DIANTE: FLUXO CONTÍNUO             -->
+        <!-- ============================================== -->
+        <div class="page-break-top">
+          <div class="print-header">
+            <span>HELENARA CHAVES</span>
+            <span>PSICÓLOGA CLÍNICA E NEUROPSICÓLOGA CRP 24/02216</span>
+          </div>
+
+          <div class="text-center font-extrabold text-[12pt] uppercase text-black tracking-wide mb-2">
+            LAUDO PSICOLÓGICO – AVALIAÇÃO NEUROPSICOLÓGICA
+          </div>
+
+          <div class="disclaimer-card">
+            O Exame Neuropsicológico bem fundamentado é de extrema importância para nortear a reabilitação/estimulação cognitiva, bem como auxiliar outros profissionais nos diagnósticos de suas respectivas áreas de atuação. Por esse motivo a anamnese e interpretação dos resultados é feita de forma detalhada e, por se tratar de documento sigiloso, deve ser repassado, fotocopiado ou discutido com terceiros somente com autorização por escrito dos pais ou responsáveis. Para o entendimento do raciocínio clínico feito durante todo o processo de avaliação é importante a leitura do documento na íntegra e não somente a conclusão. O uso apropriado das informações deve ser feito de forma ética, preservando e zelando a integridade socioemocional do examinando em questão, não o expondo a situações de constrangimento ou discriminação (Código de Ética Profissional do Psicólogo, artigo 1 (geh)).
+          </div>
+
+          <div class="main-heading">
+            3. DESCRIÇÃO DA DEMANDA
+          </div>
+          <div id="out_demanda"></div>
+
+          <div class="main-heading">
+            4. PROCEDIMENTOS
+          </div>
+          <p>Para uma avaliação neuropsicológica, são utilizados os 4 pilares: aplicação de testes cognitivos, realização de entrevistas, execução de observação comportamental e utilização de escalas de avaliação de sintomas. Respeitando estas normativas, esta avaliação foi realizada em 8 atendimentos de 40 minutos cada, cuja metodologia utilizada foi:</p>
+          <p style="margin-bottom: 2px;">1) Entrevista de anamnese com a paciente;</p>
+          <p style="margin-bottom: 2px;">2) Observação clínica durante as sessões de avaliação;</p>
+          <p style="margin-bottom: 5px;">3) Mensuração das funções cognitivas através dos seguintes instrumentos:</p>
+
+          <p class="font-bold text-[10.5pt] text-black mb-1">Tabela 1. Relação entre função avaliada e instrumento utilizado</p>
+          <table class="laudo-table">
+            <thead>
+              <tr>
+                <th style="width: 32%;">Função</th>
+                <th style="width: 68%;">Testes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="font-bold">Quociente Intelectual</td>
+                <td>Escala Wechsler Abreviada de Inteligência (WAIS);</td>
+              </tr>
+              <tr>
+                <td class="font-bold">Atenção</td>
+                <td>Bateria Psicológica para Avaliação da Atenção (BPA);</td>
+              </tr>
+              <tr>
+                <td class="font-bold">Memória</td>
+                <td>Figuras Complexas de Rey (FCR-A); Teste de Aprendizagem Auditivo-Verbal de Rey (RAVLT);</td>
+              </tr>
+              <tr>
+                <td class="font-bold">Funções Executivas</td>
+                <td>Teste dos 5 Dígitos (FDT); WAIS;</td>
+              </tr>
+              <tr>
+                <td class="font-bold">Habilidades Visuoespaciais</td>
+                <td>FCR-A; WAIS;</td>
+              </tr>
+              <tr>
+                <td class="font-bold">Linguagem</td>
+                <td>WAIS; Teste de Fluência Verbal Nominal e Categórica (FAS);</td>
+              </tr>
+              <tr>
+                <td class="font-bold">Personalidade e Comportamento</td>
+                <td>Questionário SNAP-IV; Quociente do Espectro do Autismo (QA 16+); Escala SRS-2; HTP.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>Em seguida foi realizada uma interpretação cuidadosa dos resultados embasando-se na abordagem dinâmica e sistêmica das funções neuropsicológicas desenvolvida por A. Luria, compreendendo as funções cerebrais de forma integrada para delinear o perfil cognitivo e as diretrizes terapêuticas necessárias.</p>
+
+          <div class="main-heading">
+            5. RESULTADOS
+          </div>
+
+          <div class="content-block">
+            <div class="sub-heading">5.1 APRESENTAÇÃO DURANTE A AVALIAÇÃO</div>
+            <div id="out_apresentacao"></div>
+          </div>
+
+          <div class="content-block">
+            <div class="sub-heading">5.8 PERSONALIDADE, PSICOPATOLOGIA E COMPORTAMENTO</div>
+            <div id="out_personalidade"></div>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- PÁGINA: CONCLUSÃO (PÁGINA NOVA FORÇADA)        -->
+        <!-- ============================================== -->
+        <div class="page-break-top">
+          <div class="print-header">
+            <span>HELENARA CHAVES</span>
+            <span>PSICÓLOGA CLÍNICA E NEUROPSICÓLOGA CRP 24/02216</span>
+          </div>
+
+          <div class="content-block">
+            <div class="main-heading" style="margin-top: 0;">
+              6. CONCLUSÃO
+            </div>
+            <div id="out_conclusao"></div>
+
+            <div class="info-card border-l-teal-700 bg-teal-50/60 my-3 py-2">
+              <p class="m-0 font-extrabold text-[12pt] text-teal-950" id="out_cid"></p>
+            </div>
+          </div>
+
+          <div class="content-block mt-3">
+            <div class="main-heading">
+              7. ENCAMINHAMENTOS
+            </div>
+            <div id="out_encaminhamentos"></div>
+          </div>
+
+          <!-- ASSINATURA ELETRÔNICA PADRÃO ICP-BRASIL / GOV.BR -->
+          <div class="w-full flex flex-col items-center justify-center my-4 page-break-inside-avoid text-center">
+            <p class="text-[11.5pt] font-semibold text-black mb-2 text-center" id="out_data_emissao"></p>
+            
+            <div class="digital-signature-container">
+              <span class="text-[9pt] text-slate-500 font-bold uppercase no-print select-none">Espaço Reservado para Assinatura Eletrônica (ICP-Brasil / GOV.BR)</span>
+            </div>
+
+            <div class="flex flex-col items-center justify-center border-t-2 border-black pt-2 w-[420px] max-w-full mx-auto">
+              <p class="font-extrabold text-[12pt] text-black m-0 text-center">Helenara Maria da Silva Mendes Chaves</p>
+              <p class="text-[10.5pt] font-bold text-slate-900 m-0 text-center">Psicóloga – Conselho Federal de Psicologia da Regional 24/02216</p>
+              <p class="text-[10pt] font-semibold text-slate-800 m-0 text-center">Rio Branco – Acre</p>
+            </div>
+          </div>
+
+          <div class="content-block mt-3">
+            <div class="main-heading">
+              8. REFERÊNCIAS BIBLIOGRÁFICAS
+            </div>
+            <div class="space-y-1 text-[10pt] text-black leading-snug pt-1">
+              <p class="m-0">ALVES, I. C. B. et al. Bateria Psicológica para Avaliação da Atenção (BPA). São Paulo: Vetor Editora, 2012.</p>
+              <p class="m-0">CORREIA, A. V. L.; CAMPOS, C. R. F. Teste dos 5 Dígitos (FDT): Manual. São Paulo: Vetor Editora, 2014.</p>
+              <p class="m-0">COUTO, G. N. et al. Teste de Aprendizagem Auditivo-Verbal de Rey – RAVLT. São Paulo: Vetor Editora, 2015.</p>
+              <p class="m-0">NUNES, C. H. S. et al. WAIS-IV: Escala Wechsler de Inteligência para Adultos. São Paulo: Pearson, 2013.</p>
+              <p class="m-0">CONNERS, C. K. et al. Escala de Responsividade Social – SRS-2. São Paulo: Mente, 2020.</p>
+              <p class="m-0">BUCK, J. N. HTP - House-Tree-Person: Técnica Projetiva do Desenho. São Paulo: Casa do Psicólogo, 2003.</p>
+            </div>
+          </div>
+
+          <div class="print-footer">
+            <span>Laudo Neuropsicológico • <span class="out_nome_short">Paciente</span></span>
+            <span>Encerramento</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SCRIPT DE PROCESSAMENTO AUTOMATIZADO -->
+  <script>
+    // Converte texto bruto em parágrafos e listas estilizadas
+    function formatarTextoBruto(raw) {
+      if (!raw || !raw.trim()) return '';
+      const linhas = raw.split('\n');
+      let html = '';
+      let emLista = false;
+
+      linhas.forEach(linha => {
+        const l = linha.trim();
+        if (!l) {
+          if (emLista) {
+            html += '</ul>';
+            emLista = false;
+          }
+          return;
+        }
+
+        // Se a linha começar com hífen, asterisco ou número com ponto
+        if (l.startsWith('- ') || l.startsWith('* ')) {
+          if (!emLista) {
+            html += '<ul>';
+            emLista = true;
+          }
+          html += `<li>${l.substring(2)}</li>`;
+        } else {
+          if (emLista) {
+            html += '</ul>';
+            emLista = false;
+          }
+          html += `<p>${l}</p>`;
+        }
+      });
+
+      if (emLista) html += '</ul>';
+      return html;
+    }
+
+    // Renderiza o preview em tempo real
+    function renderizar() {
+      const nome = document.getElementById('in_nome').value || 'Nome do Paciente';
+      const nasc = document.getElementById('in_nascimento').value || 'DD/MM/AAAA';
+      const idade = document.getElementById('in_idade').value || '-- anos';
+      const finalidade = document.getElementById('in_finalidade').value || 'Delinear perfil neuropsicológico.';
+      const dataEmissao = document.getElementById('in_data_emissao').value || 'Rio Branco, Acre';
+      const cid = document.getElementById('in_cid').value || 'Classificação pela CID-11: Não informado.';
+
+      document.getElementById('out_nome').innerText = nome;
+      document.querySelectorAll('.out_nome_short').forEach(el => el.innerText = nome);
+      document.getElementById('out_nascimento').innerText = nasc;
+      document.getElementById('out_idade').innerText = idade;
+      document.getElementById('out_finalidade').innerText = finalidade;
+      document.getElementById('out_data_emissao').innerText = dataEmissao;
+      document.getElementById('out_cid').innerText = cid;
+
+      document.getElementById('out_demanda').innerHTML = formatarTextoBruto(document.getElementById('in_demanda').value);
+      document.getElementById('out_apresentacao').innerHTML = formatarTextoBruto(document.getElementById('in_apresentacao').value);
+      document.getElementById('out_personalidade').innerHTML = formatarTextoBruto(document.getElementById('in_personalidade').value);
+      document.getElementById('out_conclusao').innerHTML = formatarTextoBruto(document.getElementById('in_conclusao').value);
+      document.getElementById('out_encaminhamentos').innerHTML = formatarTextoBruto(document.getElementById('in_encaminhamentos').value);
+    }
+
+    // Carrega o exemplo da Jucenilda com 1 clique
+    function carregarExemplo() {
+      document.getElementById('in_nome').value = 'Jucenilda Lima de Araújo';
+      document.getElementById('in_nascimento').value = '10/03/1986';
+      document.getElementById('in_idade').value = '40 anos';
+      document.getElementById('in_finalidade').value = 'Delinear o perfil neuropsicológico diante da alteração de comportamento e humor.';
+      document.getElementById('in_data_emissao').value = 'Rio Branco, Acre, 19 de outubro de 2026';
+      document.getElementById('in_cid').value = 'Classificação pela CID-11: 6A05.0 – Transtorno do Déficit de Atenção e Hiperatividade, apresentação predominantemente desatenta.';
+
+      document.getElementById('in_demanda').value = 
+`A paciente foi encaminhada para avaliação neuropsicológica com o objetivo de investigar a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH).
+
+Durante a anamnese, relatou dificuldades significativas nos processos de organização, gestão do tempo, manutenção da atenção e finalização de tarefas, referindo prejuízos na administração das demandas cotidianas. Descreveu dificuldades para manter o foco em atividades que exigem atenção prolongada, bem como para organizar e concluir tarefas de maneira eficiente.
+
+Relatou ainda episódios de hiperfoco, nos quais direciona intensa atenção e energia a um tema ou atividade específica, apresentando dificuldade para redirecionar a atenção para outras demandas.`;
+
+      document.getElementById('in_apresentacao').value = 
+`Durante a avaliação neuropsicológica, a paciente estabeleceu vínculo adequado com a avaliadora e respondeu aos questionamentos apresentados. Ao longo da aplicação dos testes e entrevistas, observou-se lentidão no processamento das informações, com necessidade de maior tempo para compreender instruções, organizar respostas e concluir as atividades propostas.
+
+Foram identificadas dificuldades relacionadas à manutenção da atenção, concentração e organização do pensamento, com episódios de distraibilidade e perda do foco durante a execução das tarefas. Em alguns momentos, houve necessidade de repetição das instruções e redirecionamento da atenção para a atividade em andamento.`;
+
+      document.getElementById('in_personalidade').value = 
+`No teste HTP, identificaram-se retraimento, insegurança e autoimagem rebaixada frente a pressões socioambientais. No Teste das Pirâmides Coloridas de Pfister, evidenciou-se ansiedade difusa, temor de desamparo e sobrecarga emocional interna, com potencial para reações impulsivas ou inibitórias na conclusão de tarefas rotineiras, mantendo desenvolvimento intelectual preservado.
+
+Avaliação de Disfunções Executivas (BDEFS):
+- Desatenção aos detalhes: dificuldade para manter a atenção em informações relevantes, cometendo erros por descuido.
+- Procrastinação executiva: dificuldade para iniciar, manter e concluir tarefas.
+- Gestão do tempo: prejuízos severos na mensuração e cumprimento de prazos.
+- Dificuldade para lidar com múltiplas demandas simultâneas.`;
+
+      document.getElementById('in_conclusao').value = 
+`A avaliação neuropsicológica teve como objetivo investigar a presença de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), considerando as dificuldades relatadas pela paciente ao longo de sua trajetória de vida.
+
+Na avaliação do funcionamento intelectual, a paciente apresentou Quociente de Inteligência Total (QIT = 90), situado na faixa média. Nas tarefas específicas de memória, linguagem, habilidades visuoperceptivas e funções executivas estruturadas, os resultados situaram-se na faixa média.
+
+Durante a avaliação clínica, foram observadas distraibilidade, oscilação atencional, lentidão no processamento e necessidade de reorientação contínua. Tais fatores, associados ao histórico de vida e aos prejuízos funcionais diários, corroboram o quadro clínico.
+
+Diante dos dados clínicos, comportamentais e psicométricos, o perfil é compatível com a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), apresentação predominantemente desatenta.`;
+
+      document.getElementById('in_encaminhamentos').value = 
+`- 1. Acompanhamento psicológico: treino de autorregulação e manejo da desatenção.
+- 2. Avaliação médica psiquiátrica: investigar conduta psicofarmacológica.
+- 3. Treino de funções executivas: foco em planejamento e cumprimento de prazos.
+- 4. Estratégias compensatórias: alarmes, agendas visuais e organizadores externos.
+- 5. Psicoeducação familiar e individual sobre o neurodesenvolvimento no TDAH adulto.`;
+
+      renderizar();
+    }
+
+    function limparCampos() {
+      document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+      renderizar();
+    }
+
+    // Inicialização
+    window.addEventListener('DOMContentLoaded', carregarExemplo);
+  </script>
+</body>
+</html>
