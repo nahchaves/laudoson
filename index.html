@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page_title">[v1.5 - Impressão Total & Percentil Auto] Gerador de Laudos</title>
+  <title id="page_title">[v1.6 - WISC/WAIS Auto] Gerador de Laudos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -223,7 +223,7 @@
       padding: 8px;
     }
 
-    /* CORREÇÃO CRÍTICA PARA IMPRIMIR TODAS AS PÁGINAS SEM CORTAR */
+    /* DESTRAVA ALTURA PARA IMPRESSÃO MULTIPÁGINA COMPLETA */
     @media print {
       html, body {
         background: #ffffff !important;
@@ -273,9 +273,10 @@
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-sm font-bold tracking-wide text-slate-100">Painel de Geração de Laudos</h1>
-          <span class="bg-teal-500 text-slate-950 text-[10px] px-2 py-0.5 rounded font-mono font-extrabold tracking-wider">v1.5</span>
+          <span class="bg-teal-400 text-slate-950 text-[10px] px-2 py-0.5 rounded font-mono font-extrabold tracking-wider">v1.6</span>
+          <span id="badge_bateria" class="bg-indigo-500/30 text-indigo-200 border border-indigo-400/40 text-[10px] px-2 py-0.5 rounded font-semibold">Auto: WISC / WAIS</span>
         </div>
-        <p class="text-xs text-teal-400">Impressão Multipágina Corrigida &bull; Classificação Automática por Percentil</p>
+        <p class="text-xs text-teal-400">Alternância Automática WISC-IV (&lt;16a) e WAIS (&ge;16a) &bull; Impressão Completa</p>
       </div>
     </div>
     <div class="flex items-center space-x-2">
@@ -287,7 +288,7 @@
         <input type="file" id="file_import" accept=".json" onchange="importarJSON(event)" class="hidden">
       </label>
       <button onclick="carregarRurik()" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-indigo-900/70 hover:bg-indigo-800 text-indigo-200 border border-indigo-600 transition">
-        Carregar Rurik
+        Exemplo Infantil (Rurik)
       </button>
       <button onclick="limparCampos()" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-rose-900/60 hover:bg-rose-900 text-rose-200 border border-rose-700 transition">
         Limpar Tudo
@@ -326,6 +327,15 @@
           </div>
         </div>
         <div>
+          <label class="text-xs font-medium text-teal-300 block mb-1">Bateria Wechsler (Troca Automática pela Idade)</label>
+          <select id="in_escala_wechsler" onchange="renderizar()" class="w-full bg-slate-800 border border-teal-700 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-teal-400">
+            <option value="AUTO">Automático pela Idade (&lt; 16 anos = WISC-IV | &ge; 16 anos = WAIS)</option>
+            <option value="WISC-IV">Forçar WISC-IV (Infantil / Adolescente)</option>
+            <option value="WAIS">Forçar WAIS (Adulto)</option>
+            <option value="WASI">Forçar WASI (Escala Abreviada)</option>
+          </select>
+        </div>
+        <div>
           <label class="text-xs font-medium text-slate-400 block mb-1">Finalidade da Avaliação</label>
           <input type="text" id="in_finalidade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
         </div>
@@ -343,8 +353,8 @@
       </div>
 
       <div class="border-b border-slate-700 pt-3 pb-2">
-        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">5. Resultados & Testes (Classificação Automática)</h2>
-        <p class="text-[11px] text-slate-400">Digite apenas o Percentil. A Classificação e a Interpretação da tabela mudam sozinhas conforme os manuais psicométricos.</p>
+        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">5. Resultados & Testes (Percentil Automático)</h2>
+        <p class="text-[11px] text-slate-400">Digite o Percentil. A Classificação e a Interpretação no quadro ajustam sozinhas segundo o autor do teste.</p>
       </div>
 
       <div class="space-y-4">
@@ -354,15 +364,15 @@
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.2 Quociente Intelectual (WAIS / WISC)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.2 Quociente Intelectual</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
               <span class="text-[10px] text-slate-400">Percentil QIT:</span>
               <input type="text" id="in_qit_perc" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">Classificação Manual (opcional):</span>
-              <input type="text" id="in_qit_class" oninput="renderizar()" placeholder="Deixe vazio p/ automático" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+              <span class="text-[10px] text-slate-400">Substituir Classificação (opcional):</span>
+              <input type="text" id="in_qit_class" oninput="renderizar()" placeholder="Automático se vazio" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
           </div>
           <div>
@@ -372,7 +382,7 @@
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.3 Habilidades Atencionais (BPA)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.3 Habilidades Atencionais (BPA - Rueda)</label>
           <div class="grid grid-cols-3 gap-2 text-xs">
             <div>
               <span class="text-[10px] text-slate-400">Concentrada (%):</span>
@@ -394,7 +404,7 @@
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.4 Memória (FCR-A / WISC / RAVLT)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.4 Memória (FCR-A / IMO / RAVLT)</label>
           <div class="grid grid-cols-3 gap-1.5 text-xs">
             <div>
               <span class="text-[10px] text-slate-400">Visual FCR-A (%):</span>
@@ -604,7 +614,7 @@
             4. PROCEDIMENTOS
           </div>
           <p>Para uma avaliação neuropsicológica, são utilizados os 4 pilares: aplicação de testes cognitivos, realização de entrevistas, execução de observação comportamental e utilização de escalas de avaliação de sintomas. Respeitando estas normativas, esta avaliação foi realizada em 8 atendimentos de 40 minutos cada, cuja metodologia utilizada foi:</p>
-          <p style="margin-bottom: 2px;">1) Entrevista de anamnese com a paciente;</p>
+          <p style="margin-bottom: 2px;">1) Entrevista de anamnese;</p>
           <p style="margin-bottom: 2px;">2) Observação clínica durante as sessões de avaliação;</p>
           <p style="margin-bottom: 5px;">3) Mensuração das funções cognitivas através dos seguintes instrumentos:</p>
 
@@ -619,7 +629,7 @@
             <tbody>
               <tr>
                 <td class="font-bold">Quociente Intelectual</td>
-                <td>Escala Wechsler de Inteligência (WAIS / WISC);</td>
+                <td id="proc_qi">Escala Wechsler de Inteligência;</td>
               </tr>
               <tr>
                 <td class="font-bold">Atenção</td>
@@ -627,23 +637,23 @@
               </tr>
               <tr>
                 <td class="font-bold">Memória</td>
-                <td>Figuras Complexas de Rey (FCR-A); Teste de Aprendizagem Auditivo-Verbal de Rey (RAVLT);</td>
+                <td id="proc_mem">Figuras Complexas de Rey (FCR-A); Teste de Aprendizagem Auditivo-Verbal de Rey (RAVLT);</td>
               </tr>
               <tr>
                 <td class="font-bold">Funções Executivas</td>
-                <td>Teste dos 5 Dígitos (FDT); Escalas Wechsler;</td>
+                <td id="proc_fe">Teste dos 5 Dígitos (FDT); WAIS/WISC;</td>
               </tr>
               <tr>
                 <td class="font-bold">Habilidades Visuoespaciais</td>
-                <td>FCR-A; Escalas Wechsler;</td>
+                <td id="proc_ve">FCR-A; WAIS/WISC;</td>
               </tr>
               <tr>
                 <td class="font-bold">Linguagem</td>
-                <td>Escalas Wechsler; Teste de Fluência Verbal Nominal e Categórica (FAS);</td>
+                <td id="proc_lg">WAIS/WISC; Teste de Fluência Verbal Nominal e Categórica (FAS);</td>
               </tr>
               <tr>
                 <td class="font-bold">Personalidade e Comportamento</td>
-                <td>Questionário SNAP-IV; Quociente do Espectro do Autismo (QA); Escala SRS-2; HTP; Pfister.</td>
+                <td>Questionário SNAP-IV; Escala de Responsividade Social (SRS-2); HTP; Pirâmides Coloridas de Pfister.</td>
               </tr>
             </tbody>
           </table>
@@ -675,7 +685,7 @@
               <tbody>
                 <tr>
                   <td class="font-bold">QIT</td>
-                  <td class="center">WAIS / WISC</td>
+                  <td class="center" id="lbl_teste_qi">WAIS</td>
                   <td class="center font-bold" id="out_qit_perc">--</td>
                   <td class="center" id="out_qit_class">--</td>
                   <td class="center font-bold" id="out_qit_status">--</td>
@@ -748,7 +758,7 @@
                 </tr>
                 <tr>
                   <td class="font-bold">Memória Operacional</td>
-                  <td class="center">IMO</td>
+                  <td class="center" id="lbl_teste_imo">IMO do WISC-IV</td>
                   <td class="center font-bold" id="out_mem_op">--</td>
                   <td class="center" id="out_mem_op_class">--</td>
                   <td class="center font-bold" id="out_mem_op_status">--</td>
@@ -802,7 +812,7 @@
                 </tr>
                 <tr>
                   <td class="font-bold">Velocidade de Processamento</td>
-                  <td class="center">IVP</td>
+                  <td class="center" id="lbl_teste_ivp">IVP do WISC-IV</td>
                   <td class="center font-bold" id="out_fe_vel">--</td>
                   <td class="center" id="out_fe_vel_class">--</td>
                   <td class="center font-bold" id="out_fe_vel_status">--</td>
@@ -849,7 +859,7 @@
                 </tr>
                 <tr>
                   <td class="font-bold">Partes, orientação e visuopercepção</td>
-                  <td class="center">IOP</td>
+                  <td class="center" id="lbl_teste_iop">IOP do WAIS</td>
                   <td class="center font-bold" id="out_ve_iop">--</td>
                   <td class="center" id="out_ve_iop_class">--</td>
                   <td class="center font-bold" id="out_ve_iop_status">--</td>
@@ -874,8 +884,8 @@
               </thead>
               <tbody>
                 <tr>
-                  <td class="font-bold">Escala Verbal</td>
-                  <td class="center">QIV</td>
+                  <td class="font-bold">Escala / Compreensão Verbal</td>
+                  <td class="center" id="lbl_teste_qiv">QIV / ICV</td>
                   <td class="center font-bold" id="out_lg_qiv">--</td>
                   <td class="center" id="out_lg_qiv_class">--</td>
                   <td class="center font-bold" id="out_lg_qiv_status">--</td>
@@ -950,11 +960,11 @@
               8. REFERÊNCIAS BIBLIOGRÁFICAS
             </div>
             <div class="space-y-1 text-[10pt] text-black leading-snug pt-1">
-              <p class="m-0">ALVES, I. C. B. et al. Bateria Psicológica para Avaliação da Atenção (BPA). São Paulo: Vetor Editora, 2012.</p>
-              <p class="m-0">CORREIA, A. V. L.; CAMPOS, C. R. F. Teste dos 5 Dígitos (FDT): Manual. São Paulo: Vetor Editora, 2014.</p>
-              <p class="m-0">COUTO, G. N. et al. Teste de Aprendizagem Auditivo-Verbal de Rey – RAVLT. São Paulo: Vetor Editora, 2015.</p>
-              <p class="m-0">NUNES, C. H. S. et al. WAIS-IV: Escala Wechsler de Inteligência para Adultos. São Paulo: Pearson, 2013.</p>
-              <p class="m-0">CONNERS, C. K. et al. Escala de Responsividade Social – SRS-2. São Paulo: Mente, 2020.</p>
+              <p class="m-0">RUEDA, F. J. M. Bateria Psicológica para Avaliação da Atenção (BPA). São Paulo: Vetor Editora, 2013.</p>
+              <p class="m-0" id="ref_wechsler">WECHSLER, D. Escala Wechsler de Inteligência. São Paulo: Casa do Psicólogo / Pearson.</p>
+              <p class="m-0">SEDÓ, M.; DE PAULA, J. J.; MALLOY-DINIZ, L. F. Teste dos Cinco Dígitos (FDT). São Paulo: Hogrefe, 2015.</p>
+              <p class="m-0">MALLOY-DINIZ, L. F. et al. Teste de Aprendizagem Auditivo-Verbal de Rey (RAVLT). São Paulo: Vetor Editora, 2018.</p>
+              <p class="m-0">OLIVEIRA, M. S.; RIGONI, M. S. Figuras Complexas de Rey (FCR). São Paulo: Casa do Psicólogo, 2010.</p>
               <p class="m-0">BUCK, J. N. HTP - House-Tree-Person: Técnica Projetiva do Desenho. São Paulo: Casa do Psicólogo, 2003.</p>
             </div>
           </div>
@@ -971,11 +981,12 @@
   </main>
 
   <script>
-    const STORAGE_KEY = "LAUDO_NEURO_DRAFT_V15";
+    const STORAGE_KEY = "LAUDO_NEURO_DRAFT_V16";
     let ultimaTeclaApagar = false;
+    let idadeAnosCalculada = null;
 
-    // CLASSIFICADOR AUTOMÁTICO DE PERCENTIL SEGUNDO PARÂMETROS PSICOMÉTRICOS (Wechsler, BPA, RAVLT, FDT, FCR-A)
-    function avaliarPercentil(valorRaw, classificacaoManual = '') {
+    // CLASSIFICAÇÃO NORMATIVA POR AUTOR CONFORME PERCENTIL
+    function avaliarPercentilPorAutor(valorRaw, autor = 'PADRAO', classificacaoManual = '') {
       const p = parseFloat(String(valorRaw).replace(',', '.'));
       if (isNaN(p)) {
         return {
@@ -990,34 +1001,22 @@
       let interpretacao = '';
       let corClasse = 'text-teal-900';
 
-      if (p <= 2) {
-        classificacao = 'Extremamente Baixo / Deficitário';
-        interpretacao = 'Habilidade Deficitária';
-        corClasse = 'text-red-800';
-      } else if (p <= 9) {
-        classificacao = 'Limítrofe / Inferior';
-        interpretacao = 'Dificuldade / Alerta Clínico';
-        corClasse = 'text-amber-800';
-      } else if (p <= 24) {
-        classificacao = 'Média Inferior';
-        interpretacao = 'Habilidade Preservada';
-        corClasse = 'text-teal-900';
-      } else if (p <= 74) {
-        classificacao = 'Média';
-        interpretacao = 'Habilidade Preservada';
-        corClasse = 'text-teal-900';
-      } else if (p <= 90) {
-        classificacao = 'Média Superior';
-        interpretacao = 'Habilidade Preservada (Acima da Média)';
-        corClasse = 'text-teal-950';
-      } else if (p <= 97) {
-        classificacao = 'Superior';
-        interpretacao = 'Habilidade Muito Desenvolvida';
-        corClasse = 'text-teal-950';
+      if (autor === 'BPA') {
+        // Rueda (2013) - Manual BPA
+        if (p <= 10) { classificacao = 'Inferior'; interpretacao = 'Habilidade Deficitária'; corClasse = 'text-red-800'; }
+        else if (p <= 25) { classificacao = 'Médio Inferior'; interpretacao = 'Habilidade Preservada'; corClasse = 'text-teal-900'; }
+        else if (p <= 75) { classificacao = 'Médio'; interpretacao = 'Habilidade Preservada'; corClasse = 'text-teal-900'; }
+        else if (p <= 90) { classificacao = 'Médio Superior'; interpretacao = 'Habilidade Preservada (Acima da Média)'; corClasse = 'text-teal-950'; }
+        else { classificacao = 'Superior'; interpretacao = 'Habilidade Muito Desenvolvida'; corClasse = 'text-teal-950'; }
       } else {
-        classificacao = 'Muito Superior';
-        interpretacao = 'Habilidade Altamente Desenvolvida';
-        corClasse = 'text-teal-950';
+        // Wechsler (WISC-IV / WAIS), RAVLT (Malloy-Diniz), FDT (Sedó) e FCR-A (Oliveira)
+        if (p <= 2) { classificacao = 'Extremamente Baixo / Deficitário'; interpretacao = 'Habilidade Deficitária'; corClasse = 'text-red-800'; }
+        else if (p <= 9) { classificacao = 'Limítrofe / Inferior'; interpretacao = 'Dificuldade / Alerta Clínico'; corClasse = 'text-amber-800'; }
+        else if (p <= 24) { classificacao = 'Média Inferior'; interpretacao = 'Habilidade Preservada'; corClasse = 'text-teal-900'; }
+        else if (p <= 74) { classificacao = 'Média'; interpretacao = 'Habilidade Preservada'; corClasse = 'text-teal-900'; }
+        else if (p <= 90) { classificacao = 'Média Superior'; interpretacao = 'Habilidade Preservada (Acima da Média)'; corClasse = 'text-teal-950'; }
+        else if (p <= 97) { classificacao = 'Superior'; interpretacao = 'Habilidade Muito Desenvolvida'; corClasse = 'text-teal-950'; }
+        else { classificacao = 'Muito Superior'; interpretacao = 'Habilidade Altamente Desenvolvida'; corClasse = 'text-teal-950'; }
       }
 
       if (classificacaoManual && classificacaoManual.trim() !== '') {
@@ -1027,16 +1026,69 @@
       return { perc: p, classificacao, interpretacao, corClasse };
     }
 
-    function aplicarLinhaTabela(percInputId, outPercId, outClassId, outStatusId, classManualId = null) {
+    function aplicarLinhaTabela(percInputId, outPercId, outClassId, outStatusId, autor = 'PADRAO', classManualId = null) {
       const val = document.getElementById(percInputId).value;
       const manual = classManualId ? document.getElementById(classManualId).value : '';
-      const res = avaliarPercentil(val, manual);
+      const res = avaliarPercentilPorAutor(val, autor, manual);
 
       document.getElementById(outPercId).innerText = res.perc;
       document.getElementById(outClassId).innerText = res.classificacao;
       const statusEl = document.getElementById(outStatusId);
       statusEl.innerText = res.interpretacao;
       statusEl.className = `center font-bold ${res.corClasse}`;
+    }
+
+    // Define se usa WISC-IV ou WAIS
+    function atualizarLabelsEscalaWechsler() {
+      const modo = document.getElementById('in_escala_wechsler').value;
+      let escala = 'WAIS';
+
+      if (modo === 'AUTO') {
+        if (idadeAnosCalculada !== null && idadeAnosCalculada < 16) {
+          escala = 'WISC-IV';
+        } else {
+          escala = 'WAIS';
+        }
+      } else {
+        escala = modo;
+      }
+
+      document.getElementById('badge_bateria').innerText = `Bateria Ativa: ${escala}`;
+
+      if (escala === 'WISC-IV') {
+        document.getElementById('proc_qi').innerText = 'Escala Wechsler de Inteligência para Crianças – 4ª Edição (WISC-IV);';
+        document.getElementById('proc_fe').innerText = 'Teste dos 5 Dígitos (FDT); WISC-IV;';
+        document.getElementById('proc_ve').innerText = 'FCR-A; WISC-IV;';
+        document.getElementById('proc_lg').innerText = 'WISC-IV; Teste de Fluência Verbal Nominal e Categórica (FAS);';
+        document.getElementById('lbl_teste_qi').innerText = 'WISC-IV';
+        document.getElementById('lbl_teste_imo').innerText = 'IMO do WISC-IV';
+        document.getElementById('lbl_teste_ivp').innerText = 'IVP do WISC-IV';
+        document.getElementById('lbl_teste_iop').innerText = 'IOP do WISC-IV';
+        document.getElementById('lbl_teste_qiv').innerText = 'ICV do WISC-IV';
+        document.getElementById('ref_wechsler').innerText = 'WECHSLER, D. WISC-IV: Escala Wechsler de Inteligência para Crianças – Manual Técnico. Adaptação brasileira: Rueda et al. São Paulo: Casa do Psicólogo, 2013.';
+      } else if (escala === 'WASI') {
+        document.getElementById('proc_qi').innerText = 'Escala Wechsler Abreviada de Inteligência (WASI);';
+        document.getElementById('proc_fe').innerText = 'Teste dos 5 Dígitos (FDT); WASI;';
+        document.getElementById('proc_ve').innerText = 'FCR-A; WASI;';
+        document.getElementById('proc_lg').innerText = 'WASI; Teste de Fluência Verbal Nominal e Categórica (FAS);';
+        document.getElementById('lbl_teste_qi').innerText = 'WASI';
+        document.getElementById('lbl_teste_imo').innerText = 'Escala Wechsler';
+        document.getElementById('lbl_teste_ivp').innerText = 'Escala Wechsler';
+        document.getElementById('lbl_teste_iop').innerText = 'QIE da WASI';
+        document.getElementById('lbl_teste_qiv').innerText = 'QIV da WASI';
+        document.getElementById('ref_wechsler').innerText = 'TRENTINI, C. M.; YATES, D. B.; HECK, V. S. Escala Wechsler Abreviada de Inteligência (WASI): Manual. São Paulo: Casa do Psicólogo, 2014.';
+      } else {
+        document.getElementById('proc_qi').innerText = 'Escala Wechsler de Inteligência para Adultos (WAIS);';
+        document.getElementById('proc_fe').innerText = 'Teste dos 5 Dígitos (FDT); WAIS;';
+        document.getElementById('proc_ve').innerText = 'FCR-A; WAIS;';
+        document.getElementById('proc_lg').innerText = 'WAIS; Teste de Fluência Verbal Nominal e Categórica (FAS);';
+        document.getElementById('lbl_teste_qi').innerText = 'WAIS';
+        document.getElementById('lbl_teste_imo').innerText = 'IMO do WAIS';
+        document.getElementById('lbl_teste_ivp').innerText = 'IVP do WAIS';
+        document.getElementById('lbl_teste_iop').innerText = 'IOP do WAIS';
+        document.getElementById('lbl_teste_qiv').innerText = 'QIV do WAIS';
+        document.getElementById('ref_wechsler').innerText = 'NASCIMENTO, E. WAIS-III: Escala de Inteligência Wechsler para Adultos – Manual Técnico. São Paulo: Casa do Psicólogo, 2004.';
+      }
     }
 
     function registrarTeclaData(e) {
@@ -1046,22 +1098,32 @@
     function limparData() {
       document.getElementById('in_nascimento').value = '';
       document.getElementById('in_idade').value = '';
+      idadeAnosCalculada = null;
       renderizar();
       document.getElementById('in_nascimento').focus();
     }
 
     function calcularIdadeCompleta(dataNascStr) {
       const match = dataNascStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-      if (!match) return null;
+      if (!match) {
+        idadeAnosCalculada = null;
+        return null;
+      }
       const dia = parseInt(match[1], 10);
       const mes = parseInt(match[2], 10) - 1;
       const ano = parseInt(match[3], 10);
 
       const nasc = new Date(ano, mes, dia);
-      if (isNaN(nasc.getTime()) || nasc.getDate() !== dia || nasc.getMonth() !== mes) return null;
+      if (isNaN(nasc.getTime()) || nasc.getDate() !== dia || nasc.getMonth() !== mes) {
+        idadeAnosCalculada = null;
+        return null;
+      }
 
       const hoje = new Date();
-      if (nasc > hoje) return "Data futura";
+      if (nasc > hoje) {
+        idadeAnosCalculada = 0;
+        return "Data futura";
+      }
 
       let anos = hoje.getFullYear() - nasc.getFullYear();
       let meses = hoje.getMonth() - nasc.getMonth();
@@ -1077,6 +1139,8 @@
         meses += 12;
       }
 
+      idadeAnosCalculada = anos;
+
       const partes = [];
       if (anos > 0) partes.push(`${anos} ${anos === 1 ? 'ano' : 'anos'}`);
       if (meses > 0) partes.push(`${meses} ${meses === 1 ? 'mês' : 'meses'}`);
@@ -1085,9 +1149,9 @@
       return partes.join(', ');
     }
 
-    // Permite apagar livremente com Backspace sem travar nas barras "/"
     function tratarDataInput(input) {
       if (ultimaTeclaApagar) {
+        calcularIdadeCompleta(input.value);
         renderizar();
         return;
       }
@@ -1111,7 +1175,6 @@
       renderizar();
     }
 
-    // Quando o usuário digita apenas 6 números (ex: 101010) e sai do campo ou dá Tab, converte para 10/10/2010
     function finalizarDataSeCurta(input) {
       let v = input.value.replace(/\D/g, '');
       if (v.length === 6) {
@@ -1155,7 +1218,7 @@
     }
 
     function coletarDados() {
-      const inputs = document.querySelectorAll('#editor-sidebar input, #editor-sidebar textarea');
+      const inputs = document.querySelectorAll('#editor-sidebar input, #editor-sidebar textarea, #editor-sidebar select');
       const dados = {};
       inputs.forEach(el => {
         if (el.id) dados[el.id] = el.value;
@@ -1166,10 +1229,14 @@
     function renderizar() {
       const nome = document.getElementById('in_nome').value.trim() || '---';
       const nasc = document.getElementById('in_nascimento').value.trim() || '---';
+      if (nasc.length === 10) calcularIdadeCompleta(nasc);
+
       const idade = document.getElementById('in_idade').value.trim() || '---';
       const finalidade = document.getElementById('in_finalidade').value.trim() || '---';
       const dataEmissao = document.getElementById('in_data_emissao').value.trim() || 'Rio Branco – Acre';
       const cid = document.getElementById('in_cid').value.trim() || 'Classificação pela CID-11: Não informado.';
+
+      atualizarLabelsEscalaWechsler();
 
       document.getElementById('out_nome').innerText = nome;
       document.querySelectorAll('.out_nome_short').forEach(el => el.innerText = nome);
@@ -1185,38 +1252,38 @@
       document.getElementById('out_conclusao').innerHTML = formatarTextoBruto(document.getElementById('in_conclusao').value);
       document.getElementById('out_encaminhamentos').innerHTML = formatarTextoBruto(document.getElementById('in_encaminhamentos').value);
 
-      // Atualização automática de todas as linhas de tabelas (Percentil -> Classificação + Interpretação)
-      aplicarLinhaTabela('in_qit_perc', 'out_qit_perc', 'out_qit_class', 'out_qit_status', 'in_qit_class');
+      // Tabelas com cálculo por autor
+      aplicarLinhaTabela('in_qit_perc', 'out_qit_perc', 'out_qit_class', 'out_qit_status', 'WECHSLER', 'in_qit_class');
       document.getElementById('out_qi_interp').innerText = document.getElementById('in_qi_interp').value || '';
 
-      aplicarLinhaTabela('in_at_conc', 'out_at_conc', 'out_at_conc_class', 'out_at_conc_status');
-      aplicarLinhaTabela('in_at_div', 'out_at_div', 'out_at_div_class', 'out_at_div_status');
-      aplicarLinhaTabela('in_at_alt', 'out_at_alt', 'out_at_alt_class', 'out_at_alt_status');
+      aplicarLinhaTabela('in_at_conc', 'out_at_conc', 'out_at_conc_class', 'out_at_conc_status', 'BPA');
+      aplicarLinhaTabela('in_at_div', 'out_at_div', 'out_at_div_class', 'out_at_div_status', 'BPA');
+      aplicarLinhaTabela('in_at_alt', 'out_at_alt', 'out_at_alt_class', 'out_at_alt_status', 'BPA');
       document.getElementById('out_at_interp').innerText = document.getElementById('in_at_interp').value || '';
 
-      aplicarLinhaTabela('in_mem_vis', 'out_mem_vis', 'out_mem_vis_class', 'out_mem_vis_status');
-      aplicarLinhaTabela('in_mem_op', 'out_mem_op', 'out_mem_op_class', 'out_mem_op_status');
-      aplicarLinhaTabela('in_mem_imed', 'out_mem_imed', 'out_mem_imed_class', 'out_mem_imed_status');
-      aplicarLinhaTabela('in_mem_tard', 'out_mem_tard', 'out_mem_tard_class', 'out_mem_tard_status');
-      aplicarLinhaTabela('in_mem_rec', 'out_mem_rec', 'out_mem_rec_class', 'out_mem_rec_status');
+      aplicarLinhaTabela('in_mem_vis', 'out_mem_vis', 'out_mem_vis_class', 'out_mem_vis_status', 'FCRA');
+      aplicarLinhaTabela('in_mem_op', 'out_mem_op', 'out_mem_op_class', 'out_mem_op_status', 'WECHSLER');
+      aplicarLinhaTabela('in_mem_imed', 'out_mem_imed', 'out_mem_imed_class', 'out_mem_imed_status', 'RAVLT');
+      aplicarLinhaTabela('in_mem_tard', 'out_mem_tard', 'out_mem_tard_class', 'out_mem_tard_status', 'RAVLT');
+      aplicarLinhaTabela('in_mem_rec', 'out_mem_rec', 'out_mem_rec_class', 'out_mem_rec_status', 'RAVLT');
       document.getElementById('out_mem_interp').innerText = document.getElementById('in_mem_interp').value || '';
 
-      aplicarLinhaTabela('in_fe_plan', 'out_fe_plan', 'out_fe_plan_class', 'out_fe_plan_status');
-      aplicarLinhaTabela('in_fe_vel', 'out_fe_vel', 'out_fe_vel_class', 'out_fe_vel_status');
-      aplicarLinhaTabela('in_fe_inib', 'out_fe_inib', 'out_fe_inib_class', 'out_fe_inib_status');
-      aplicarLinhaTabela('in_fe_flex', 'out_fe_flex', 'out_fe_flex_class', 'out_fe_flex_status');
+      aplicarLinhaTabela('in_fe_plan', 'out_fe_plan', 'out_fe_plan_class', 'out_fe_plan_status', 'FCRA');
+      aplicarLinhaTabela('in_fe_vel', 'out_fe_vel', 'out_fe_vel_class', 'out_fe_vel_status', 'WECHSLER');
+      aplicarLinhaTabela('in_fe_inib', 'out_fe_inib', 'out_fe_inib_class', 'out_fe_inib_status', 'FDT');
+      aplicarLinhaTabela('in_fe_flex', 'out_fe_flex', 'out_fe_flex_class', 'out_fe_flex_status', 'FDT');
       document.getElementById('out_fe_interp').innerText = document.getElementById('in_fe_interp').value || '';
 
-      aplicarLinhaTabela('in_ve_fcra', 'out_ve_fcra', 'out_ve_fcra_class', 'out_ve_fcra_status');
-      aplicarLinhaTabela('in_ve_iop', 'out_ve_iop', 'out_ve_iop_class', 'out_ve_iop_status');
+      aplicarLinhaTabela('in_ve_fcra', 'out_ve_fcra', 'out_ve_fcra_class', 'out_ve_fcra_status', 'FCRA');
+      aplicarLinhaTabela('in_ve_iop', 'out_ve_iop', 'out_ve_iop_class', 'out_ve_iop_status', 'WECHSLER');
       document.getElementById('out_ve_interp').innerText = document.getElementById('in_ve_interp').value || '';
 
-      aplicarLinhaTabela('in_lg_qiv', 'out_lg_qiv', 'out_lg_qiv_class', 'out_lg_qiv_status');
-      aplicarLinhaTabela('in_lg_nom', 'out_lg_nom', 'out_lg_nom_class', 'out_lg_nom_status');
-      aplicarLinhaTabela('in_lg_cat', 'out_lg_cat', 'out_lg_cat_class', 'out_lg_cat_status');
+      aplicarLinhaTabela('in_lg_qiv', 'out_lg_qiv', 'out_lg_qiv_class', 'out_lg_qiv_status', 'WECHSLER');
+      aplicarLinhaTabela('in_lg_nom', 'out_lg_nom', 'out_lg_nom_class', 'out_lg_nom_status', 'FAS');
+      aplicarLinhaTabela('in_lg_cat', 'out_lg_cat', 'out_lg_cat_class', 'out_lg_cat_status', 'FAS');
       document.getElementById('out_lg_interp').innerText = document.getElementById('in_lg_interp').value || '';
 
-      document.title = `[v1.5] Laudo: ${nome !== '---' ? nome : 'Em edição'}`;
+      document.title = `[v1.6] Laudo: ${nome !== '---' ? nome : 'Em edição'}`;
 
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(coletarDados()));
@@ -1260,16 +1327,18 @@
     function limparCampos() {
       if (!confirm("Deseja realmente limpar todos os campos?")) return;
       document.querySelectorAll('#editor-sidebar input, #editor-sidebar textarea').forEach(el => el.value = '');
+      document.getElementById('in_escala_wechsler').value = 'AUTO';
+      idadeAnosCalculada = null;
       localStorage.removeItem(STORAGE_KEY);
       renderizar();
     }
 
-    // Carrega exatamente os dados enviados no JSON do RURIK HEIRORQ
     function carregarRurik() {
       const dadosRurik = {
         "in_nome": "RURIK HEIRORQ",
         "in_nascimento": "25/10/2020",
         "in_idade": calcularIdadeCompleta("25/10/2020") || "5 anos, 11 meses, 24 dias",
+        "in_escala_wechsler": "AUTO",
         "in_finalidade": "Delinear o perfil neuropsicológico diante da alteração de comportamento e humor.",
         "in_data_emissao": "Rio Branco, Acre, 19 de outubro de 2026",
         "in_demanda": "O paciente foi encaminhado para avaliação neuropsicológica com o objetivo de investigar a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH).\nDurante a anamnese, relatou dificuldades significativas nos processos de organização, gestão do tempo, manutenção da atenção e finalização de tarefas, referindo prejuízos na administração das demandas cotidianas. Descreveu dificuldades para manter o foco em atividades que exigem atenção prolongada, bem como para organizar e concluir tarefas de maneira eficiente.\nRelatou ainda episódios de hiperfoco, nos quais direciona intensa atenção e energia a um tema ou atividade específica, apresentando dificuldade para redirecionar a atenção para outras demandas. Tais características foram consideradas no processo avaliativo, visando investigar possíveis manifestações de desatenção e dificuldades nas funções executivas associadas ao TDAH.",
