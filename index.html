@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page_title">[v1.4 - AutoSave & Data/Idade OK] Gerador de Laudos</title>
+  <title id="page_title">[v1.5 - Impressão Total & Percentil Auto] Gerador de Laudos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
     }
 
     .cover-page {
-      min-height: 250mm;
+      min-height: 255mm;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -56,7 +56,7 @@
     }
 
     .contracapa-page {
-      min-height: 250mm;
+      min-height: 255mm;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -223,28 +223,38 @@
       padding: 8px;
     }
 
+    /* CORREÇÃO CRÍTICA PARA IMPRIMIR TODAS AS PÁGINAS SEM CORTAR */
     @media print {
-      body {
+      html, body {
         background: #ffffff !important;
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        display: block !important;
       }
       .no-print, #editor-sidebar {
         display: none !important;
       }
-      #preview-pane {
+      main, #preview-pane {
+        display: block !important;
         width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: transparent !important;
       }
       .document-wrapper {
         width: 100% !important;
+        min-height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
       }
       .cover-page, .contracapa-page {
-        min-height: auto !important;
-        height: auto !important;
+        min-height: 255mm !important;
+        height: 255mm !important;
       }
       .page-break-top {
         page-break-before: always !important;
@@ -263,24 +273,24 @@
       <div>
         <div class="flex items-center gap-2">
           <h1 class="text-sm font-bold tracking-wide text-slate-100">Painel de Geração de Laudos</h1>
-          <span class="bg-teal-500/20 text-teal-300 border border-teal-500/40 text-[10px] px-2 py-0.5 rounded font-mono font-bold tracking-wider">v1.4</span>
+          <span class="bg-teal-500 text-slate-950 text-[10px] px-2 py-0.5 rounded font-mono font-extrabold tracking-wider">v1.5</span>
         </div>
-        <p class="text-xs text-teal-400">AutoSave no Navegador &bull; Cálculo em Anos, Meses e Dias</p>
+        <p class="text-xs text-teal-400">Impressão Multipágina Corrigida &bull; Classificação Automática por Percentil</p>
       </div>
     </div>
     <div class="flex items-center space-x-2">
-      <button onclick="exportarJSON()" title="Baixar arquivo de backup do laudo" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-700/50 transition">
+      <button onclick="exportarJSON()" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-700/50 transition">
         Baixar .JSON
       </button>
-      <label title="Abrir laudo salvo em arquivo" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-700/50 transition cursor-pointer">
+      <label class="px-2.5 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-teal-300 border border-teal-700/50 transition cursor-pointer">
         Abrir .JSON
         <input type="file" id="file_import" accept=".json" onchange="importarJSON(event)" class="hidden">
       </label>
-      <button onclick="carregarExemplo()" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition">
-        Restaurar Padrão
+      <button onclick="carregarRurik()" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-indigo-900/70 hover:bg-indigo-800 text-indigo-200 border border-indigo-600 transition">
+        Carregar Rurik
       </button>
       <button onclick="limparCampos()" class="px-2.5 py-1.5 text-xs font-semibold rounded bg-rose-900/60 hover:bg-rose-900 text-rose-200 border border-rose-700 transition">
-        Limpar
+        Limpar Tudo
       </button>
       <button onclick="window.print()" class="px-5 py-2 text-sm font-bold rounded bg-teal-500 hover:bg-teal-400 text-slate-950 flex items-center gap-2 shadow transition active:scale-95 cursor-pointer ml-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -300,16 +310,19 @@
       <div class="space-y-3">
         <div>
           <label class="text-xs font-medium text-slate-400 block mb-1">Nome Completo</label>
-          <input type="text" id="in_nome" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Digite o nome completo">
+          <input type="text" id="in_nome" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="text-xs font-medium text-slate-400 block mb-1">Data de Nascimento (ou digite 101010)</label>
-            <input type="text" id="in_nascimento" oninput="tratarDataInput(this)" onblur="formatarDataBlur(this)" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="DD/MM/AAAA">
+            <label class="text-xs font-medium text-slate-400 block mb-1">Data de Nascimento</label>
+            <div class="relative flex items-center">
+              <input type="text" id="in_nascimento" maxlength="10" onkeydown="registrarTeclaData(event)" oninput="tratarDataInput(this)" onblur="finalizarDataSeCurta(this)" class="w-full bg-slate-800 border border-slate-700 rounded pl-2.5 pr-7 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="DD/MM/AAAA ou 101010">
+              <button type="button" onclick="limparData()" title="Apagar data" class="absolute right-2 text-slate-400 hover:text-rose-400 text-xs font-bold">✕</button>
+            </div>
           </div>
           <div>
             <label class="text-xs font-medium text-slate-400 block mb-1">Idade Cronológica (Auto)</label>
-            <input type="text" id="in_idade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Cálculo automático">
+            <input type="text" id="in_idade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
           </div>
         </div>
         <div>
@@ -330,7 +343,8 @@
       </div>
 
       <div class="border-b border-slate-700 pt-3 pb-2">
-        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">5. Resultados & Testes</h2>
+        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">5. Resultados & Testes (Classificação Automática)</h2>
+        <p class="text-[11px] text-slate-400">Digite apenas o Percentil. A Classificação e a Interpretação da tabela mudam sozinhas conforme os manuais psicométricos.</p>
       </div>
 
       <div class="space-y-4">
@@ -340,19 +354,19 @@
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.2 Quociente Intelectual</label>
+          <label class="text-xs font-bold text-teal-300 block">5.2 Quociente Intelectual (WAIS / WISC)</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
               <span class="text-[10px] text-slate-400">Percentil QIT:</span>
               <input type="text" id="in_qit_perc" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">Classificação:</span>
-              <input type="text" id="in_qit_class" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+              <span class="text-[10px] text-slate-400">Classificação Manual (opcional):</span>
+              <input type="text" id="in_qit_class" oninput="renderizar()" placeholder="Deixe vazio p/ automático" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400">Interpretação do QI:</span>
+            <span class="text-[10px] text-slate-400">Texto de Interpretação do QI:</span>
             <textarea id="in_qi_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
           </div>
         </div>
@@ -374,103 +388,103 @@
             </div>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400">Interpretação da Atenção:</span>
+            <span class="text-[10px] text-slate-400">Texto de Interpretação da Atenção:</span>
             <textarea id="in_at_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
           </div>
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.4 Memória (Percentis)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.4 Memória (FCR-A / WISC / RAVLT)</label>
           <div class="grid grid-cols-3 gap-1.5 text-xs">
             <div>
-              <span class="text-[10px] text-slate-400">Visual FCR-A:</span>
+              <span class="text-[10px] text-slate-400">Visual FCR-A (%):</span>
               <input type="text" id="in_mem_vis" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">Operacional IMO:</span>
+              <span class="text-[10px] text-slate-400">Operacional IMO (%):</span>
               <input type="text" id="in_mem_op" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">RAVLT Imediata:</span>
+              <span class="text-[10px] text-slate-400">RAVLT Imediata (%):</span>
               <input type="text" id="in_mem_imed" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">RAVLT Tardia:</span>
+              <span class="text-[10px] text-slate-400">RAVLT Tardia (%):</span>
               <input type="text" id="in_mem_tard" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div class="col-span-2">
-              <span class="text-[10px] text-slate-400">RAVLT Reconhecimento:</span>
+              <span class="text-[10px] text-slate-400">RAVLT Reconhecimento (%):</span>
               <input type="text" id="in_mem_rec" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400">Interpretação da Memória:</span>
+            <span class="text-[10px] text-slate-400">Texto de Interpretação da Memória:</span>
             <textarea id="in_mem_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
           </div>
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.5 Funções Executivas (Percentis)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.5 Funções Executivas (FCR-A / IVP / FDT)</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <span class="text-[10px] text-slate-400">Planejamento (FCR-A):</span>
+              <span class="text-[10px] text-slate-400">Planejamento FCR-A (%):</span>
               <input type="text" id="in_fe_plan" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">Velocidade (IVP):</span>
+              <span class="text-[10px] text-slate-400">Velocidade IVP (%):</span>
               <input type="text" id="in_fe_vel" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">Controle Inibitório (FDT):</span>
+              <span class="text-[10px] text-slate-400">Controle Inibitório FDT (%):</span>
               <input type="text" id="in_fe_inib" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">Flexibilidade (FDT):</span>
+              <span class="text-[10px] text-slate-400">Flexibilidade FDT (%):</span>
               <input type="text" id="in_fe_flex" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400">Interpretação das Funções Executivas:</span>
+            <span class="text-[10px] text-slate-400">Texto de Interpretação das Funções Executivas:</span>
             <textarea id="in_fe_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
           </div>
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.6 Visuoespaciais (Percentis)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.6 Visuoespaciais (FCR-A / IOP)</label>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <span class="text-[10px] text-slate-400">FCR-A (Visuoconstrução):</span>
+              <span class="text-[10px] text-slate-400">FCR-A Visuoconstrução (%):</span>
               <input type="text" id="in_ve_fcra" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">IOP WAIS (Visuopercepção):</span>
+              <span class="text-[10px] text-slate-400">IOP Visuopercepção (%):</span>
               <input type="text" id="in_ve_iop" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400">Interpretação Visuoespacial:</span>
+            <span class="text-[10px] text-slate-400">Texto de Interpretação Visuoespacial:</span>
             <textarea id="in_ve_interp" rows="2" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
           </div>
         </div>
 
         <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
-          <label class="text-xs font-bold text-teal-300 block">5.7 Linguagem (Percentis)</label>
+          <label class="text-xs font-bold text-teal-300 block">5.7 Linguagem (QIV / FAS)</label>
           <div class="grid grid-cols-3 gap-1.5 text-xs">
             <div>
-              <span class="text-[10px] text-slate-400">Escala Verbal (QIV):</span>
+              <span class="text-[10px] text-slate-400">Escala Verbal QIV (%):</span>
               <input type="text" id="in_lg_qiv" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">FAS Nominal:</span>
+              <span class="text-[10px] text-slate-400">FAS Nominal (%):</span>
               <input type="text" id="in_lg_nom" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400">FAS Categórica:</span>
+              <span class="text-[10px] text-slate-400">FAS Categórica (%):</span>
               <input type="text" id="in_lg_cat" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
             </div>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400">Interpretação da Linguagem:</span>
+            <span class="text-[10px] text-slate-400">Texto de Interpretação da Linguagem:</span>
             <textarea id="in_lg_interp" rows="2" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
           </div>
         </div>
@@ -523,7 +537,6 @@
             </h2>
           </div>
 
-          <!-- Assinatura institucional (sem nome do paciente) -->
           <div class="pb-6 text-center space-y-1">
             <p class="text-black font-extrabold text-[12pt] text-center m-0">Helenara Maria da Silva Mendes Chaves</p>
             <p class="text-slate-900 font-bold text-[11pt] text-center m-0">Psicóloga – Conselho Federal de Psicologia da Regional 24/02216</p>
@@ -531,7 +544,7 @@
           </div>
         </div>
 
-        <!-- PÁGINA 2: FOLHA DE ROSTO / IDENTIFICAÇÃO (ONDE FICAM OS DADOS DO PACIENTE) -->
+        <!-- PÁGINA 2: FOLHA DE ROSTO / IDENTIFICAÇÃO -->
         <div class="page-break-top contracapa-page">
           <div>
             <div class="print-header">
@@ -567,7 +580,7 @@
           </div>
         </div>
 
-        <!-- PÁGINA 3 EM DIANTE: MIOLO -->
+        <!-- PÁGINA 3 EM DIANTE: MIOLO CONTÍNUO -->
         <div class="page-break-top">
           <div class="print-header">
             <span>HELENARA CHAVES</span>
@@ -606,7 +619,7 @@
             <tbody>
               <tr>
                 <td class="font-bold">Quociente Intelectual</td>
-                <td>Escala Wechsler Abreviada de Inteligência (WAIS);</td>
+                <td>Escala Wechsler de Inteligência (WAIS / WISC);</td>
               </tr>
               <tr>
                 <td class="font-bold">Atenção</td>
@@ -618,19 +631,19 @@
               </tr>
               <tr>
                 <td class="font-bold">Funções Executivas</td>
-                <td>Teste dos 5 Dígitos (FDT); WAIS;</td>
+                <td>Teste dos 5 Dígitos (FDT); Escalas Wechsler;</td>
               </tr>
               <tr>
                 <td class="font-bold">Habilidades Visuoespaciais</td>
-                <td>FCR-A; WAIS;</td>
+                <td>FCR-A; Escalas Wechsler;</td>
               </tr>
               <tr>
                 <td class="font-bold">Linguagem</td>
-                <td>WAIS; Teste de Fluência Verbal Nominal e Categórica (FAS);</td>
+                <td>Escalas Wechsler; Teste de Fluência Verbal Nominal e Categórica (FAS);</td>
               </tr>
               <tr>
                 <td class="font-bold">Personalidade e Comportamento</td>
-                <td>Questionário SNAP-IV; Quociente do Espectro do Autismo (QA 16+); Escala SRS-2; HTP.</td>
+                <td>Questionário SNAP-IV; Quociente do Espectro do Autismo (QA); Escala SRS-2; HTP; Pfister.</td>
               </tr>
             </tbody>
           </table>
@@ -662,10 +675,10 @@
               <tbody>
                 <tr>
                   <td class="font-bold">QIT</td>
-                  <td class="center">WAIS</td>
+                  <td class="center">WAIS / WISC</td>
                   <td class="center font-bold" id="out_qit_perc">--</td>
                   <td class="center" id="out_qit_class">--</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center font-bold" id="out_qit_status">--</td>
                 </tr>
               </tbody>
             </table>
@@ -690,22 +703,22 @@
                   <td class="font-bold">Atenção Concentrada</td>
                   <td class="center">BPA</td>
                   <td class="center font-bold" id="out_at_conc">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_at_conc_class">--</td>
+                  <td class="center font-bold" id="out_at_conc_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Atenção Dividida</td>
                   <td class="center">BPA</td>
                   <td class="center font-bold" id="out_at_div">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_at_div_class">--</td>
+                  <td class="center font-bold" id="out_at_div_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Atenção Alternada</td>
                   <td class="center">BPA</td>
                   <td class="center font-bold" id="out_at_alt">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_at_alt_class">--</td>
+                  <td class="center font-bold" id="out_at_alt_status">--</td>
                 </tr>
               </tbody>
             </table>
@@ -730,36 +743,36 @@
                   <td class="font-bold">Memória Visual Imediata</td>
                   <td class="center">FCR-A</td>
                   <td class="center font-bold" id="out_mem_vis">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_mem_vis_class">--</td>
+                  <td class="center font-bold" id="out_mem_vis_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Memória Operacional</td>
-                  <td class="center">IMO do WISC-IV</td>
+                  <td class="center">IMO</td>
                   <td class="center font-bold" id="out_mem_op">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_mem_op_class">--</td>
+                  <td class="center font-bold" id="out_mem_op_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Memória Episódica Verbal (Imediata)</td>
                   <td class="center">RAVLT</td>
                   <td class="center font-bold" id="out_mem_imed">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_mem_imed_class">--</td>
+                  <td class="center font-bold" id="out_mem_imed_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Memória Episódica Verbal (Tardia)</td>
                   <td class="center">RAVLT</td>
                   <td class="center font-bold" id="out_mem_tard">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_mem_tard_class">--</td>
+                  <td class="center font-bold" id="out_mem_tard_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Memória Episódica Verbal (Reconhecimento)</td>
                   <td class="center">RAVLT</td>
                   <td class="center font-bold" id="out_mem_rec">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_mem_rec_class">--</td>
+                  <td class="center font-bold" id="out_mem_rec_status">--</td>
                 </tr>
               </tbody>
             </table>
@@ -784,29 +797,29 @@
                   <td class="font-bold">Planejamento e Organização</td>
                   <td class="center">FCR-A</td>
                   <td class="center font-bold" id="out_fe_plan">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_fe_plan_class">--</td>
+                  <td class="center font-bold" id="out_fe_plan_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Velocidade de Processamento</td>
-                  <td class="center">IVP do WISC-IV</td>
+                  <td class="center">IVP</td>
                   <td class="center font-bold" id="out_fe_vel">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_fe_vel_class">--</td>
+                  <td class="center font-bold" id="out_fe_vel_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Controle Inibitório</td>
                   <td class="center">FDT</td>
                   <td class="center font-bold" id="out_fe_inib">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_fe_inib_class">--</td>
+                  <td class="center font-bold" id="out_fe_inib_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Flexibilidade Mental</td>
                   <td class="center">FDT</td>
                   <td class="center font-bold" id="out_fe_flex">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_fe_flex_class">--</td>
+                  <td class="center font-bold" id="out_fe_flex_status">--</td>
                 </tr>
               </tbody>
             </table>
@@ -831,15 +844,15 @@
                   <td class="font-bold">Perspectiva, orientação e visuoconstrução</td>
                   <td class="center">FCR-A</td>
                   <td class="center font-bold" id="out_ve_fcra">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_ve_fcra_class">--</td>
+                  <td class="center font-bold" id="out_ve_fcra_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Partes, orientação e visuopercepção</td>
-                  <td class="center">IOP do WAIS</td>
+                  <td class="center">IOP</td>
                   <td class="center font-bold" id="out_ve_iop">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_ve_iop_class">--</td>
+                  <td class="center font-bold" id="out_ve_iop_status">--</td>
                 </tr>
               </tbody>
             </table>
@@ -864,22 +877,22 @@
                   <td class="font-bold">Escala Verbal</td>
                   <td class="center">QIV</td>
                   <td class="center font-bold" id="out_lg_qiv">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_lg_qiv_class">--</td>
+                  <td class="center font-bold" id="out_lg_qiv_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Fluência Verbal Nominal</td>
                   <td class="center">FAS</td>
                   <td class="center font-bold" id="out_lg_nom">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_lg_nom_class">--</td>
+                  <td class="center font-bold" id="out_lg_nom_status">--</td>
                 </tr>
                 <tr>
                   <td class="font-bold">Fluência Verbal Categórica</td>
                   <td class="center">FAS</td>
                   <td class="center font-bold" id="out_lg_cat">--</td>
-                  <td class="center">Média</td>
-                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                  <td class="center" id="out_lg_cat_class">--</td>
+                  <td class="center font-bold" id="out_lg_cat_status">--</td>
                 </tr>
               </tbody>
             </table>
@@ -917,7 +930,7 @@
             <div id="out_encaminhamentos"></div>
           </div>
 
-          <!-- ASSINATURA ELETRÔNICA PADRÃO ICP-BRASIL / GOV.BR -->
+          <!-- ASSINATURA ELETRÔNICA -->
           <div class="w-full flex flex-col items-center justify-center my-4 page-break-inside-avoid text-center">
             <p class="text-[11.5pt] font-semibold text-black mb-2 text-center" id="out_data_emissao"></p>
             
@@ -958,9 +971,163 @@
   </main>
 
   <script>
-    const STORAGE_KEY = "LAUDO_NEURO_DRAFT_V1";
+    const STORAGE_KEY = "LAUDO_NEURO_DRAFT_V15";
+    let ultimaTeclaApagar = false;
 
-    // Converte texto bruto em parágrafos e listas
+    // CLASSIFICADOR AUTOMÁTICO DE PERCENTIL SEGUNDO PARÂMETROS PSICOMÉTRICOS (Wechsler, BPA, RAVLT, FDT, FCR-A)
+    function avaliarPercentil(valorRaw, classificacaoManual = '') {
+      const p = parseFloat(String(valorRaw).replace(',', '.'));
+      if (isNaN(p)) {
+        return {
+          perc: valorRaw || '--',
+          classificacao: classificacaoManual || '--',
+          interpretacao: '--',
+          corClasse: 'text-slate-700'
+        };
+      }
+
+      let classificacao = '';
+      let interpretacao = '';
+      let corClasse = 'text-teal-900';
+
+      if (p <= 2) {
+        classificacao = 'Extremamente Baixo / Deficitário';
+        interpretacao = 'Habilidade Deficitária';
+        corClasse = 'text-red-800';
+      } else if (p <= 9) {
+        classificacao = 'Limítrofe / Inferior';
+        interpretacao = 'Dificuldade / Alerta Clínico';
+        corClasse = 'text-amber-800';
+      } else if (p <= 24) {
+        classificacao = 'Média Inferior';
+        interpretacao = 'Habilidade Preservada';
+        corClasse = 'text-teal-900';
+      } else if (p <= 74) {
+        classificacao = 'Média';
+        interpretacao = 'Habilidade Preservada';
+        corClasse = 'text-teal-900';
+      } else if (p <= 90) {
+        classificacao = 'Média Superior';
+        interpretacao = 'Habilidade Preservada (Acima da Média)';
+        corClasse = 'text-teal-950';
+      } else if (p <= 97) {
+        classificacao = 'Superior';
+        interpretacao = 'Habilidade Muito Desenvolvida';
+        corClasse = 'text-teal-950';
+      } else {
+        classificacao = 'Muito Superior';
+        interpretacao = 'Habilidade Altamente Desenvolvida';
+        corClasse = 'text-teal-950';
+      }
+
+      if (classificacaoManual && classificacaoManual.trim() !== '') {
+        classificacao = classificacaoManual.trim();
+      }
+
+      return { perc: p, classificacao, interpretacao, corClasse };
+    }
+
+    function aplicarLinhaTabela(percInputId, outPercId, outClassId, outStatusId, classManualId = null) {
+      const val = document.getElementById(percInputId).value;
+      const manual = classManualId ? document.getElementById(classManualId).value : '';
+      const res = avaliarPercentil(val, manual);
+
+      document.getElementById(outPercId).innerText = res.perc;
+      document.getElementById(outClassId).innerText = res.classificacao;
+      const statusEl = document.getElementById(outStatusId);
+      statusEl.innerText = res.interpretacao;
+      statusEl.className = `center font-bold ${res.corClasse}`;
+    }
+
+    function registrarTeclaData(e) {
+      ultimaTeclaApagar = (e.key === 'Backspace' || e.key === 'Delete');
+    }
+
+    function limparData() {
+      document.getElementById('in_nascimento').value = '';
+      document.getElementById('in_idade').value = '';
+      renderizar();
+      document.getElementById('in_nascimento').focus();
+    }
+
+    function calcularIdadeCompleta(dataNascStr) {
+      const match = dataNascStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (!match) return null;
+      const dia = parseInt(match[1], 10);
+      const mes = parseInt(match[2], 10) - 1;
+      const ano = parseInt(match[3], 10);
+
+      const nasc = new Date(ano, mes, dia);
+      if (isNaN(nasc.getTime()) || nasc.getDate() !== dia || nasc.getMonth() !== mes) return null;
+
+      const hoje = new Date();
+      if (nasc > hoje) return "Data futura";
+
+      let anos = hoje.getFullYear() - nasc.getFullYear();
+      let meses = hoje.getMonth() - nasc.getMonth();
+      let dias = hoje.getDate() - nasc.getDate();
+
+      if (dias < 0) {
+        meses--;
+        const ultimoDiaMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
+        dias += ultimoDiaMesAnterior;
+      }
+      if (meses < 0) {
+        anos--;
+        meses += 12;
+      }
+
+      const partes = [];
+      if (anos > 0) partes.push(`${anos} ${anos === 1 ? 'ano' : 'anos'}`);
+      if (meses > 0) partes.push(`${meses} ${meses === 1 ? 'mês' : 'meses'}`);
+      if (dias > 0 || partes.length === 0) partes.push(`${dias} ${dias === 1 ? 'dia' : 'dias'}`);
+
+      return partes.join(', ');
+    }
+
+    // Permite apagar livremente com Backspace sem travar nas barras "/"
+    function tratarDataInput(input) {
+      if (ultimaTeclaApagar) {
+        renderizar();
+        return;
+      }
+
+      let v = input.value.replace(/\D/g, '');
+      if (v.length > 8) v = v.substring(0, 8);
+
+      if (v.length >= 5) {
+        input.value = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4)}`;
+      } else if (v.length >= 3) {
+        input.value = `${v.substring(0, 2)}/${v.substring(2)}`;
+      } else {
+        input.value = v;
+      }
+
+      if (input.value.length === 10) {
+        const calc = calcularIdadeCompleta(input.value);
+        if (calc) document.getElementById('in_idade').value = calc;
+      }
+
+      renderizar();
+    }
+
+    // Quando o usuário digita apenas 6 números (ex: 101010) e sai do campo ou dá Tab, converte para 10/10/2010
+    function finalizarDataSeCurta(input) {
+      let v = input.value.replace(/\D/g, '');
+      if (v.length === 6) {
+        const dia = v.substring(0, 2);
+        const mes = v.substring(2, 4);
+        let ano = parseInt(v.substring(4, 6), 10);
+        ano = ano < 40 ? 2000 + ano : 1900 + ano;
+        input.value = `${dia}/${mes}/${ano}`;
+      }
+      if (input.value.length === 10) {
+        const calc = calcularIdadeCompleta(input.value);
+        if (calc) document.getElementById('in_idade').value = calc;
+      }
+      renderizar();
+    }
+
     function formatarTextoBruto(raw) {
       if (!raw || !raw.trim()) return '';
       const linhas = raw.split('\n');
@@ -987,102 +1154,15 @@
       return html;
     }
 
-    // Calcula a idade exata em anos, meses e dias
-    function calcularIdadeCompleta(dataNascStr) {
-      const match = dataNascStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-      if (!match) return null;
-      const dia = parseInt(match[1], 10);
-      const mes = parseInt(match[2], 10) - 1;
-      const ano = parseInt(match[3], 10);
-
-      const nasc = new Date(ano, mes, dia);
-      if (isNaN(nasc.getTime())) return null;
-
-      const hoje = new Date();
-      if (nasc > hoje) return "Data futura";
-
-      let anos = hoje.getFullYear() - nasc.getFullYear();
-      let meses = hoje.getMonth() - nasc.getMonth();
-      let dias = hoje.getDate() - nasc.getDate();
-
-      if (dias < 0) {
-        meses--;
-        // Pega o último dia do mês anterior
-        const ultimoDiaMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
-        dias += ultimoDiaMesAnterior;
-      }
-      if (meses < 0) {
-        anos--;
-        meses += 12;
-      }
-
-      const partes = [];
-      if (anos > 0) partes.push(`${anos} ${anos === 1 ? 'ano' : 'anos'}`);
-      if (meses > 0) partes.push(`${meses} ${meses === 1 ? 'mês' : 'meses'}`);
-      if (dias > 0 || partes.length === 0) partes.push(`${dias} ${dias === 1 ? 'dia' : 'dias'}`);
-
-      return partes.join(', ');
-    }
-
-    // Máscara inteligente de data: aceita 101010, 25102019, ou digitação normal
-    function tratarDataInput(input) {
-      let v = input.value.replace(/\D/g, ''); // só números
-
-      // Se o usuário digitou direto 6 números (ex: 101010 = 10/10/2010)
-      if (v.length === 6) {
-        const dia = v.substring(0, 2);
-        const mes = v.substring(2, 4);
-        let ano = parseInt(v.substring(4, 6), 10);
-        ano = ano < 40 ? 2000 + ano : 1900 + ano;
-        input.value = `${dia}/${mes}/${ano}`;
-      } else if (v.length === 8) {
-        input.value = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4, 8)}`;
-      } else if (v.length > 2 && v.length <= 4) {
-        input.value = `${v.substring(0, 2)}/${v.substring(2)}`;
-      } else if (v.length > 4) {
-        input.value = `${v.substring(0, 2)}/${v.substring(2, 4)}/${v.substring(4, 8)}`;
-      }
-
-      // Se a data estiver completa (10 chars: DD/MM/AAAA), calcula idade automaticamente
-      if (input.value.length === 10) {
-        const calculada = calcularIdadeCompleta(input.value);
-        if (calculada) {
-          document.getElementById('in_idade').value = calculada;
-        }
-      }
-
-      renderizar();
-    }
-
-    function formatarDataBlur(input) {
-      let v = input.value.replace(/\D/g, '');
-      if (v.length === 6) {
-        const dia = v.substring(0, 2);
-        const mes = v.substring(2, 4);
-        let ano = parseInt(v.substring(4, 6), 10);
-        ano = ano < 40 ? 2000 + ano : 1900 + ano;
-        input.value = `${dia}/${mes}/${ano}`;
-      }
-      if (input.value.length === 10) {
-        const calculada = calcularIdadeCompleta(input.value);
-        if (calculada) {
-          document.getElementById('in_idade').value = calculada;
-        }
-      }
-      renderizar();
-    }
-
-    // Coleta todos os campos para salvar
     function coletarDados() {
       const inputs = document.querySelectorAll('#editor-sidebar input, #editor-sidebar textarea');
       const dados = {};
       inputs.forEach(el => {
-        dados[el.id] = el.value;
+        if (el.id) dados[el.id] = el.value;
       });
       return dados;
     }
 
-    // Renderiza e Salva Automaticamente no LocalStorage
     function renderizar() {
       const nome = document.getElementById('in_nome').value.trim() || '---';
       const nasc = document.getElementById('in_nascimento').value.trim() || '---';
@@ -1091,7 +1171,6 @@
       const dataEmissao = document.getElementById('in_data_emissao').value.trim() || 'Rio Branco – Acre';
       const cid = document.getElementById('in_cid').value.trim() || 'Classificação pela CID-11: Não informado.';
 
-      // Identificação na Página 2
       document.getElementById('out_nome').innerText = nome;
       document.querySelectorAll('.out_nome_short').forEach(el => el.innerText = nome);
       document.getElementById('out_nascimento').innerText = nasc;
@@ -1100,62 +1179,52 @@
       document.getElementById('out_data_emissao').innerText = dataEmissao;
       document.getElementById('out_cid').innerText = cid;
 
-      // Textos
       document.getElementById('out_demanda').innerHTML = formatarTextoBruto(document.getElementById('in_demanda').value);
       document.getElementById('out_apresentacao').innerHTML = formatarTextoBruto(document.getElementById('in_apresentacao').value);
       document.getElementById('out_personalidade').innerHTML = formatarTextoBruto(document.getElementById('in_personalidade').value);
       document.getElementById('out_conclusao').innerHTML = formatarTextoBruto(document.getElementById('in_conclusao').value);
       document.getElementById('out_encaminhamentos').innerHTML = formatarTextoBruto(document.getElementById('in_encaminhamentos').value);
 
-      // 5.2 QI
-      document.getElementById('out_qit_perc').innerText = document.getElementById('in_qit_perc').value || '--';
-      document.getElementById('out_qit_class').innerText = document.getElementById('in_qit_class').value || '--';
+      // Atualização automática de todas as linhas de tabelas (Percentil -> Classificação + Interpretação)
+      aplicarLinhaTabela('in_qit_perc', 'out_qit_perc', 'out_qit_class', 'out_qit_status', 'in_qit_class');
       document.getElementById('out_qi_interp').innerText = document.getElementById('in_qi_interp').value || '';
 
-      // 5.3 Atenção
-      document.getElementById('out_at_conc').innerText = document.getElementById('in_at_conc').value || '--';
-      document.getElementById('out_at_div').innerText = document.getElementById('in_at_div').value || '--';
-      document.getElementById('out_at_alt').innerText = document.getElementById('in_at_alt').value || '--';
+      aplicarLinhaTabela('in_at_conc', 'out_at_conc', 'out_at_conc_class', 'out_at_conc_status');
+      aplicarLinhaTabela('in_at_div', 'out_at_div', 'out_at_div_class', 'out_at_div_status');
+      aplicarLinhaTabela('in_at_alt', 'out_at_alt', 'out_at_alt_class', 'out_at_alt_status');
       document.getElementById('out_at_interp').innerText = document.getElementById('in_at_interp').value || '';
 
-      // 5.4 Memória
-      document.getElementById('out_mem_vis').innerText = document.getElementById('in_mem_vis').value || '--';
-      document.getElementById('out_mem_op').innerText = document.getElementById('in_mem_op').value || '--';
-      document.getElementById('out_mem_imed').innerText = document.getElementById('in_mem_imed').value || '--';
-      document.getElementById('out_mem_tard').innerText = document.getElementById('in_mem_tard').value || '--';
-      document.getElementById('out_mem_rec').innerText = document.getElementById('in_mem_rec').value || '--';
+      aplicarLinhaTabela('in_mem_vis', 'out_mem_vis', 'out_mem_vis_class', 'out_mem_vis_status');
+      aplicarLinhaTabela('in_mem_op', 'out_mem_op', 'out_mem_op_class', 'out_mem_op_status');
+      aplicarLinhaTabela('in_mem_imed', 'out_mem_imed', 'out_mem_imed_class', 'out_mem_imed_status');
+      aplicarLinhaTabela('in_mem_tard', 'out_mem_tard', 'out_mem_tard_class', 'out_mem_tard_status');
+      aplicarLinhaTabela('in_mem_rec', 'out_mem_rec', 'out_mem_rec_class', 'out_mem_rec_status');
       document.getElementById('out_mem_interp').innerText = document.getElementById('in_mem_interp').value || '';
 
-      // 5.5 Funções Executivas
-      document.getElementById('out_fe_plan').innerText = document.getElementById('in_fe_plan').value || '--';
-      document.getElementById('out_fe_vel').innerText = document.getElementById('in_fe_vel').value || '--';
-      document.getElementById('out_fe_inib').innerText = document.getElementById('in_fe_inib').value || '--';
-      document.getElementById('out_fe_flex').innerText = document.getElementById('in_fe_flex').value || '--';
+      aplicarLinhaTabela('in_fe_plan', 'out_fe_plan', 'out_fe_plan_class', 'out_fe_plan_status');
+      aplicarLinhaTabela('in_fe_vel', 'out_fe_vel', 'out_fe_vel_class', 'out_fe_vel_status');
+      aplicarLinhaTabela('in_fe_inib', 'out_fe_inib', 'out_fe_inib_class', 'out_fe_inib_status');
+      aplicarLinhaTabela('in_fe_flex', 'out_fe_flex', 'out_fe_flex_class', 'out_fe_flex_status');
       document.getElementById('out_fe_interp').innerText = document.getElementById('in_fe_interp').value || '';
 
-      // 5.6 Visuoespacial
-      document.getElementById('out_ve_fcra').innerText = document.getElementById('in_ve_fcra').value || '--';
-      document.getElementById('out_ve_iop').innerText = document.getElementById('in_ve_iop').value || '--';
+      aplicarLinhaTabela('in_ve_fcra', 'out_ve_fcra', 'out_ve_fcra_class', 'out_ve_fcra_status');
+      aplicarLinhaTabela('in_ve_iop', 'out_ve_iop', 'out_ve_iop_class', 'out_ve_iop_status');
       document.getElementById('out_ve_interp').innerText = document.getElementById('in_ve_interp').value || '';
 
-      // 5.7 Linguagem
-      document.getElementById('out_lg_qiv').innerText = document.getElementById('in_lg_qiv').value || '--';
-      document.getElementById('out_lg_nom').innerText = document.getElementById('in_lg_nom').value || '--';
-      document.getElementById('out_lg_cat').innerText = document.getElementById('in_lg_cat').value || '--';
+      aplicarLinhaTabela('in_lg_qiv', 'out_lg_qiv', 'out_lg_qiv_class', 'out_lg_qiv_status');
+      aplicarLinhaTabela('in_lg_nom', 'out_lg_nom', 'out_lg_nom_class', 'out_lg_nom_status');
+      aplicarLinhaTabela('in_lg_cat', 'out_lg_cat', 'out_lg_cat_class', 'out_lg_cat_status');
       document.getElementById('out_lg_interp').innerText = document.getElementById('in_lg_interp').value || '';
 
-      // Título da aba
-      document.title = `[v1.4] Laudo: ${nome !== '---' ? nome : 'Em edição'}`;
+      document.title = `[v1.5] Laudo: ${nome !== '---' ? nome : 'Em edição'}`;
 
-      // SALVAMENTO AUTOMÁTICO INSTANTÂNEO NO NAVEGADOR
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(coletarDados()));
       } catch (e) {
-        console.error("Erro ao salvar no LocalStorage", e);
+        console.error(e);
       }
     }
 
-    // Exportar Backup para Arquivo JSON
     function exportarJSON() {
       const dados = coletarDados();
       const nome = dados.in_nome ? dados.in_nome.replace(/\s+/g, '_') : 'Laudo';
@@ -1168,7 +1237,6 @@
       URL.revokeObjectURL(url);
     }
 
-    // Importar Arquivo JSON
     function importarJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1181,7 +1249,6 @@
             if (el) el.value = dados[id];
           });
           renderizar();
-          alert("Laudo importado com sucesso!");
         } catch (err) {
           alert("Arquivo JSON inválido.");
         }
@@ -1191,93 +1258,60 @@
     }
 
     function limparCampos() {
-      if (!confirm("Deseja realmente limpar todos os campos do laudo?")) return;
+      if (!confirm("Deseja realmente limpar todos os campos?")) return;
       document.querySelectorAll('#editor-sidebar input, #editor-sidebar textarea').forEach(el => el.value = '');
       localStorage.removeItem(STORAGE_KEY);
       renderizar();
     }
 
-    function carregarExemplo() {
-      document.getElementById('in_nome').value = 'Jucenilda Lima de Araújo';
-      document.getElementById('in_nascimento').value = '10/03/1986';
-      document.getElementById('in_idade').value = calcularIdadeCompleta('10/03/1986') || '40 anos';
-      document.getElementById('in_finalidade').value = 'Delinear o perfil neuropsicológico diante da alteração de comportamento e humor.';
-      document.getElementById('in_data_emissao').value = 'Rio Branco, Acre, 19 de outubro de 2026';
-      document.getElementById('in_cid').value = 'Classificação pela CID-11: 6A05.0 – Transtorno do Déficit de Atenção e Hiperatividade, apresentação predominantemente desatenta.';
+    // Carrega exatamente os dados enviados no JSON do RURIK HEIRORQ
+    function carregarRurik() {
+      const dadosRurik = {
+        "in_nome": "RURIK HEIRORQ",
+        "in_nascimento": "25/10/2020",
+        "in_idade": calcularIdadeCompleta("25/10/2020") || "5 anos, 11 meses, 24 dias",
+        "in_finalidade": "Delinear o perfil neuropsicológico diante da alteração de comportamento e humor.",
+        "in_data_emissao": "Rio Branco, Acre, 19 de outubro de 2026",
+        "in_demanda": "O paciente foi encaminhado para avaliação neuropsicológica com o objetivo de investigar a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH).\nDurante a anamnese, relatou dificuldades significativas nos processos de organização, gestão do tempo, manutenção da atenção e finalização de tarefas, referindo prejuízos na administração das demandas cotidianas. Descreveu dificuldades para manter o foco em atividades que exigem atenção prolongada, bem como para organizar e concluir tarefas de maneira eficiente.\nRelatou ainda episódios de hiperfoco, nos quais direciona intensa atenção e energia a um tema ou atividade específica, apresentando dificuldade para redirecionar a atenção para outras demandas. Tais características foram consideradas no processo avaliativo, visando investigar possíveis manifestações de desatenção e dificuldades nas funções executivas associadas ao TDAH.",
+        "in_apresentacao": "Durante a avaliação neuropsicológica, o paciente estabeleceu vínculo adequado com a avaliadora e respondeu aos questionamentos apresentados. Ao longo da aplicação dos testes e entrevistas, observou-se lentidão no processamento das informações, com necessidade de maior tempo para compreender instruções, organizar respostas e concluir as atividades propostas.\nForam identificadas dificuldades relacionadas à manutenção da atenção, concentração e organização do pensamento, com episódios de distraibilidade e perda do foco durante a execução das tarefas. Em alguns momentos, houve necessidade de repetição das instruções e redirecionamento da atenção para a atividade em andamento. De modo geral, o comportamento evidenciou prejuízos nos processos atencionais e executivos, compatíveis com a investigação de TDAH desatento.",
+        "in_qit_perc": "50",
+        "in_qit_class": "",
+        "in_qi_interp": "Apresentou Quociente de Inteligência Total situado na faixa média, com habilidades intelectuais globais preservadas. Durante a aplicação, foram identificadas dificuldades significativas nos processos atencionais (manutenção do foco, sustentação e planejamento), na memória operacional e no controle atencional, com repercussões na eficiência cognitiva cotidiana compatíveis com TDAH desatento.",
+        "in_at_conc": "45",
+        "in_at_div": "42",
+        "in_at_alt": "42",
+        "in_at_interp": "Apesar do desempenho normativo na faixa média nos subtestes da BPA, o paciente apresenta prejuízos funcionais no cotidiano na manutenção do foco e na recuperação espontânea sob sobrecarga atencional.",
+        "in_mem_vis": "47",
+        "in_mem_op": "47",
+        "in_mem_imed": "45",
+        "in_mem_tard": "48",
+        "in_mem_rec": "47",
+        "in_mem_interp": "Habilidades de memória visual imediata, operacional e episódica verbal encontram-se preservadas na faixa média. Demonstrou capacidade preservada para retenção, registro e resgate mnemônico, dependendo, contudo, da eficiência atencional de entrada.",
+        "in_fe_plan": "35",
+        "in_fe_vel": "35",
+        "in_fe_inib": "35",
+        "in_fe_flex": "47",
+        "in_fe_interp": "Apesar dos escores quantitativos médios em ambiente testológico protegido, constatam-se prejuízos funcionais acentuados na rotina diária (gerenciamento de tempo, cumprimento de prazos e organização com esforço mental sustentado), manifestações típicas do perfil de TDAH desatento.",
+        "in_ve_fcra": "47",
+        "in_ve_iop": "45",
+        "in_ve_interp": "Funções visuoperceptivas e visuoconstrutivas preservadas na faixa média, com oscilações associadas à necessidade de monitoramento atencional.",
+        "in_lg_qiv": "45",
+        "in_lg_nom": "45",
+        "in_lg_cat": "45",
+        "in_lg_interp": "Linguagem estruturada e fluência preservadas na faixa normativa média.",
+        "in_personalidade": "No teste HTP, identificaram-se retraimento, insegurança e autoimagem rebaixada frente a pressões socioambientais. No Teste das Pirâmides Coloridas de Pfister, evidenciou-se ansiedade difusa, temor de desamparo e sobrecarga emocional interna, com potencial para reações impulsivas ou inibitórias na conclusão de tarefas rotineiras, mantendo desenvolvimento intelectual preservado.\nDisfunções Executivas (BDEFS) – Perfil TDAH Desatento:\n- Desatenção aos detalhes e lapsos: comete erros por descuido e dificuldade de vigilância prolongada.\n- Procrastinação executiva: entrave para iniciar e manter fluxo até o término das tarefas.\n- Planejamento e tempo: prejuízo na mensuração de prazos e organização sequencial.\n- Sensação de sobrecarga: fadiga acentuada e declínio de produtividade diante de tarefas concorrentes.\n- Monitoramento e esquecimentos: perda de constância operacional e esquecimentos rotineiros frequentes.",
+        "in_conclusao": "A avaliação neuropsicológica teve como objetivo investigar a presença de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), considerando as dificuldades relatadas ao longo de sua trajetória de vida, especialmente relacionadas à atenção, organização, planejamento e gerenciamento das demandas cotidianas.\nNa avaliação do funcionamento intelectual, apresentou Quociente de Inteligência Total situado na faixa média. Nas tarefas específicas de memória, linguagem, habilidades visuoperceptivas e funções executivas estruturadas, os escores situaram-se predominantemente na faixa média. Entretanto, durante a avaliação clínica, foram observadas distraibilidade, oscilação atencional, lentidão no processamento e necessidade de reorientação contínua.\nNa anamnese, foram confirmadas dificuldades crônicas em manter o foco, iniciar e concluir atividades, além de esquecimentos rotineiros e procrastinação sistemática com repercussões funcionais evidentes. Pontua-se que escores médios em testagens estandardizadas não excluem TDAH, devendo o diagnóstico alicerçar-se na convergência clínica e histórica.\nDiante do quadro clínico-cognitivo e comportamental, o perfil apresentado é compatível com a hipótese de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), apresentação predominantemente desatenta.\n\nRecomenda-se acompanhamento multidisciplinar com ênfase no treino executivo, suporte emocional e avaliação médica psiquiátrica especializada.",
+        "in_cid": "Classificação pela CID-11: 6A05.0 – Transtorno do Déficit de Atenção e Hiperatividade, apresentação predominantemente desatenta.",
+        "in_encaminhamentos": "- 1. Acompanhamento psicológico: intervenção voltada ao treino de autorregulação emocional, enfrentamento da ansiedade e manejo de sintomas de desatenção.\n- 2. Avaliação psiquiátrica: encaminhamento médico para elucidação diagnóstica complementar e discussão de conduta psicofarmacológica.\n- 3. Treino de funções executivas: implementação de estratégias de priorização, gestão do tempo e finalização de demandas.\n- 4. Estratégias compensatórias: uso regular de facilitadores externos (agendas visuais, aplicativos, alarmes e listas estruturadas).\n- 5. Psicoeducação: orientação contínua sobre as características do neurodesenvolvimento no TDAH.\n- 6. Monitoramento clínico: reavaliação periódica dos ganhos adaptativos e do plano terapêutico."
+      };
 
-      document.getElementById('in_demanda').value = 
-`A paciente foi encaminhada para avaliação neuropsicológica com o objetivo de investigar a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH).
-
-Durante a anamnese, relatou dificuldades significativas nos processos de organização, gestão do tempo, manutenção da atenção e finalização de tarefas, referindo prejuízos na administração das demandas cotidianas. Descreveu dificuldades para manter o foco em atividades que exigem atenção prolongada, bem como para organizar e concluir tarefas de maneira eficiente.
-
-Relatou ainda episódios de hiperfoco, nos quais direciona intensa atenção e energia a um tema ou atividade específica, apresentando dificuldade para redirecionar a atenção para outras demandas.`;
-
-      document.getElementById('in_apresentacao').value = 
-`Durante a avaliação neuropsicológica, a paciente estabeleceu vínculo adequado com a avaliadora e respondeu aos questionamentos apresentados. Ao longo da aplicação dos testes e entrevistas, observou-se lentidão no processamento das informações, com necessidade de maior tempo para compreender instruções, organizar respostas e concluir as atividades propostas.
-
-Foram identificadas dificuldades relacionadas à manutenção da atenção, concentração e organização do pensamento, com episódios de distraibilidade e perda do foco durante a execução das tarefas. Em alguns momentos, houve necessidade de repetição das instruções e redirecionamento da atenção para a atividade em andamento. De modo geral, o comportamento evidenciou prejuízos nos processos atencionais e executivos, compatíveis com a investigação de TDAH desatento.`;
-
-      document.getElementById('in_qit_perc').value = '24';
-      document.getElementById('in_qit_class').value = 'Média';
-      document.getElementById('in_qi_interp').value = 'A paciente apresentou Quociente de Inteligência Total (QIT) de 90, correspondente ao percentil 24, situando-se na faixa média, com habilidades intelectuais globais preservadas. Durante a aplicação, foram identificadas dificuldades significativas nos processos atencionais (manutenção do foco, sustentação e planejamento), na memória operacional e no controle atencional, com repercussões na eficiência cognitiva cotidiana compatíveis com TDAH desatento.';
-
-      document.getElementById('in_at_conc').value = '23';
-      document.getElementById('in_at_div').value = '21';
-      document.getElementById('in_at_alt').value = '22';
-      document.getElementById('in_at_interp').value = 'Apesar do desempenho normativo na faixa média, a paciente apresenta prejuízos funcionais no cotidiano na manutenção do foco e na recuperação espontânea sob sobrecarga atencional. Os resultados estruturados não evidenciam alterações primárias de memória, mas oscilações atencionais com reflexo funcional.';
-
-      document.getElementById('in_mem_vis').value = '21';
-      document.getElementById('in_mem_op').value = '22';
-      document.getElementById('in_mem_imed').value = '23';
-      document.getElementById('in_mem_tard').value = '21';
-      document.getElementById('in_mem_rec').value = '24';
-      document.getElementById('in_mem_interp').value = 'Habilidades de memória visual imediata, operacional e episódica verbal encontram-se preservadas na faixa média. A paciente demonstrou capacidade preservada para retenção, registro e resgate mnemônico, dependendo, contudo, da eficiência atencional de entrada.';
-
-      document.getElementById('in_fe_plan').value = '21';
-      document.getElementById('in_fe_vel').value = '26';
-      document.getElementById('in_fe_inib').value = '20';
-      document.getElementById('in_fe_flex').value = '22';
-      document.getElementById('in_fe_interp').value = 'Apesar dos escores quantitativos médios em ambiente testológico protegido, constatam-se prejuízos funcionais acentuados na rotina diária (gerenciamento de tempo, cumprimento de prazos e organização com esforço mental sustentado), manifestações típicas do perfil de TDAH desatento.';
-
-      document.getElementById('in_ve_fcra').value = '22';
-      document.getElementById('in_ve_iop').value = '23';
-      document.getElementById('in_ve_interp').value = 'Funções visuoperceptivas preservadas na média, com variações de velocidade associadas à lentificação e necessidade de monitoramento atencional detalhado.';
-
-      document.getElementById('in_lg_qiv').value = '26';
-      document.getElementById('in_lg_nom').value = '24';
-      document.getElementById('in_lg_cat').value = '23';
-      document.getElementById('in_lg_interp').value = 'Linguagem estruturada e fluência preservadas na faixa normativa média. As queixas de comunicação relacionam-se primariamente à dispersão mental e fadiga atencional durante diálogos longos.';
-
-      document.getElementById('in_personalidade').value = 
-`No teste HTP, identificaram-se retraimento, insegurança e autoimagem rebaixada frente a pressões socioambientais. No Teste das Pirâmides Coloridas de Pfister, evidenciou-se ansiedade difusa, temor de desamparo e sobrecarga emocional interna, com potencial para reações impulsivas ou inibitórias na conclusão de tarefas rotineiras, mantendo desenvolvimento intelectual preservado.
-
-Avaliação de Disfunções Executivas (BDEFS) – Perfil TDAH Desatento:
-- Desatenção aos detalhes e lapsos: comete erros por descuido e dificuldade de vigilância prolongada.
-- Procrastinação executiva: entrave para iniciar e manter fluxo até o término das tarefas.
-- Planejamento e tempo: prejuízo na mensuração de prazos e organização sequencial.
-- Sensação de sobrecarga: fadiga acentuada e declínio de produtividade diante de tarefas concorrentes.
-- Monitoramento e esquecimentos: perda de constância operacional e esquecimentos rotineiros frequentes.`;
-
-      document.getElementById('in_conclusao').value = 
-`A avaliação neuropsicológica teve como objetivo investigar a presença de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), considerando as dificuldades relatadas pela paciente ao longo de sua trajetória de vida.
-
-Na avaliação do funcionamento intelectual, a paciente apresentou Quociente de Inteligência Total (QIT = 90), situado na faixa média. Nas tarefas específicas de memória, linguagem, habilidades visuoperceptivas e funções executivas estruturadas, os resultados situaram-se na faixa média.
-
-Durante a avaliação clínica, foram observadas distraibilidade, oscilação atencional, lentidão no processamento e necessidade de reorientação contínua. Tais fatores, associados ao histórico de vida e aos prejuízos funcionais diários, corroboram o quadro clínico.
-
-Diante dos dados clínicos, comportamentais e psicométricos, o perfil é compatível com a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), apresentação predominantemente desatenta.`;
-
-      document.getElementById('in_encaminhamentos').value = 
-`- 1. Acompanhamento psicológico: treino de autorregulação e manejo da desatenção.
-- 2. Avaliação médica psiquiátrica: investigar conduta psicofarmacológica.
-- 3. Treino de funções executivas: foco em planejamento e cumprimento de prazos.
-- 4. Estratégias compensatórias: alarmes, agendas visuais e organizadores externos.
-- 5. Psicoeducação familiar e individual sobre o neurodesenvolvimento no TDAH adulto.`;
-
+      Object.keys(dadosRurik).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = dadosRurik[id];
+      });
       renderizar();
     }
 
-    // Inicialização inteligente: restaura o último rascunho salvo do usuário ou o exemplo
     window.addEventListener('DOMContentLoaded', () => {
       const salvo = localStorage.getItem(STORAGE_KEY);
       if (salvo) {
@@ -1293,7 +1327,7 @@ Diante dos dados clínicos, comportamentais e psicométricos, o perfil é compat
           console.error(e);
         }
       }
-      carregarExemplo();
+      carregarRurik();
     });
   </script>
 </body>
