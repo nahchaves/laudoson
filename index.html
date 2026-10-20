@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador Automatizado de Laudos Neuropsicológicos</title>
+  <!-- VERSÃO NA ABA DO NAVEGADOR -->
+  <title>[v1.2] Gerador de Laudos Neuropsicológicos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,7 +30,6 @@
       padding: 0;
     }
 
-    /* Container do Laudo */
     .document-wrapper {
       width: 210mm;
       min-height: 297mm;
@@ -41,7 +41,6 @@
       position: relative;
     }
 
-    /* Quebra forçada de página */
     .page-break-top {
       page-break-before: always !important;
       break-before: page !important;
@@ -64,7 +63,6 @@
       justify-content: space-between;
     }
 
-    /* Tipografia de Baixa Visão / Alto Contraste */
     .doc-content p {
       font-size: 11.5pt;
       line-height: 1.48;
@@ -130,7 +128,6 @@
       margin-bottom: 8px;
     }
 
-    /* Tabelas */
     table.laudo-table {
       width: 100%;
       border-collapse: collapse;
@@ -227,7 +224,6 @@
       padding: 8px;
     }
 
-    /* Ocultar painel de edição na impressão */
     @media print {
       body {
         background: #ffffff !important;
@@ -260,20 +256,22 @@
 </head>
 <body class="h-screen overflow-hidden flex flex-col">
 
-  <!-- BARRA DE TOPO -->
   <header class="no-print bg-slate-900 border-b border-slate-800 text-white px-6 py-2.5 flex items-center justify-between shrink-0 z-50">
     <div class="flex items-center space-x-3">
       <div class="w-8 h-8 rounded bg-teal-600 flex items-center justify-center font-bold text-white text-lg">
         Ψ
       </div>
       <div>
-        <h1 class="text-sm font-bold tracking-wide text-slate-100">Painel de Geração Automática de Laudos</h1>
-        <p class="text-xs text-teal-400">Cole o texto bruto ao lado &bull; O laudo formata sozinho</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold tracking-wide text-slate-100">Painel de Geração de Laudos</h1>
+          <span class="bg-teal-500/20 text-teal-300 border border-teal-500/40 text-[10px] px-2 py-0.5 rounded font-mono font-bold tracking-wider">v1.2</span>
+        </div>
+        <p class="text-xs text-teal-400">Edição Completa de Todas as Seções e Testes</p>
       </div>
     </div>
     <div class="flex items-center space-x-3">
       <button onclick="carregarExemplo()" class="px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition">
-        Carregar Modelo Preenchido
+        Restaurar Padrão
       </button>
       <button onclick="limparCampos()" class="px-3 py-1.5 text-xs font-semibold rounded bg-rose-900/60 hover:bg-rose-900 text-rose-200 border border-rose-700 transition">
         Limpar
@@ -285,11 +283,9 @@
     </div>
   </header>
 
-  <!-- ÁREA DE TRABALHO: EDITOR + PREVIEW -->
   <main class="flex-1 flex overflow-hidden">
     
-    <!-- BARRA LATERAL COM OS CAMPOS DE TEXTO BRUTO -->
-    <aside id="editor-sidebar" class="w-2/5 min-w-[380px] max-w-[520px] bg-slate-900 text-slate-200 p-5 overflow-y-auto border-r border-slate-800 space-y-4">
+    <aside id="editor-sidebar" class="w-2/5 min-w-[390px] max-w-[550px] bg-slate-900 text-slate-200 p-5 overflow-y-auto border-r border-slate-800 space-y-4">
       
       <div class="border-b border-slate-700 pb-2">
         <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">1. Dados do Paciente</h2>
@@ -297,76 +293,209 @@
 
       <div class="space-y-3">
         <div>
-          <label class="text-xs font-medium text-slate-400 block mb-1">Nome Completo do Paciente</label>
-          <input type="text" id="in_nome" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: Maria das Graças">
+          <label class="text-xs font-medium text-slate-400 block mb-1">Nome Completo</label>
+          <input type="text" id="in_nome" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="text-xs font-medium text-slate-400 block mb-1">Data de Nascimento</label>
-            <input type="text" id="in_nascimento" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="DD/MM/AAAA">
+            <input type="text" id="in_nascimento" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
           </div>
           <div>
             <label class="text-xs font-medium text-slate-400 block mb-1">Idade Cronológica</label>
-            <input type="text" id="in_idade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: 35 anos">
+            <input type="text" id="in_idade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
           </div>
         </div>
         <div>
           <label class="text-xs font-medium text-slate-400 block mb-1">Finalidade da Avaliação</label>
-          <input type="text" id="in_finalidade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: Delinear perfil neuropsicológico...">
+          <input type="text" id="in_finalidade" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
         </div>
         <div>
           <label class="text-xs font-medium text-slate-400 block mb-1">Data e Local de Emissão</label>
-          <input type="text" id="in_data_emissao" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500" placeholder="Ex: Rio Branco, Acre, 19 de outubro de 2026">
+          <input type="text" id="in_data_emissao" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-teal-500">
         </div>
       </div>
 
       <div class="border-b border-slate-700 pt-3 pb-2">
-        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">2. Textos Brutos das Seções</h2>
-        <p class="text-[11px] text-slate-400">Separe parágrafos dando Enter. Para listas com marcadores, inicie a linha com "- " ou "* ".</p>
+        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">2. Descrição da Demanda</h2>
+      </div>
+      <div>
+        <textarea id="in_demanda" rows="4" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500"></textarea>
+      </div>
+
+      <div class="border-b border-slate-700 pt-3 pb-2">
+        <h2 class="text-sm font-bold text-teal-400 uppercase tracking-wider">5. Resultados & Testes</h2>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="text-xs font-medium text-slate-300 block mb-1">3. Descrição da Demanda</label>
-          <textarea id="in_demanda" rows="4" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole o texto da demanda..."></textarea>
+          <label class="text-xs font-medium text-slate-300 block mb-1">5.1 Apresentação Durante a Avaliação</label>
+          <textarea id="in_apresentacao" rows="4" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500"></textarea>
         </div>
 
-        <div>
-          <label class="text-xs font-medium text-slate-300 block mb-1">5.1 Apresentação Durante a Avaliação</label>
-          <textarea id="in_apresentacao" rows="4" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole o texto da apresentação..."></textarea>
+        <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
+          <label class="text-xs font-bold text-teal-300 block">5.2 Quociente Intelectual</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400">Percentil QIT:</span>
+              <input type="text" id="in_qit_perc" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Classificação:</span>
+              <input type="text" id="in_qit_class" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Interpretação do QI:</span>
+            <textarea id="in_qi_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
+          <label class="text-xs font-bold text-teal-300 block">5.3 Habilidades Atencionais (BPA)</label>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400">Concentrada (%):</span>
+              <input type="text" id="in_at_conc" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Dividida (%):</span>
+              <input type="text" id="in_at_div" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Alternada (%):</span>
+              <input type="text" id="in_at_alt" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Interpretação da Atenção:</span>
+            <textarea id="in_at_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
+          <label class="text-xs font-bold text-teal-300 block">5.4 Memória (Percentis)</label>
+          <div class="grid grid-cols-3 gap-1.5 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400">Visual FCR-A:</span>
+              <input type="text" id="in_mem_vis" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Operacional IMO:</span>
+              <input type="text" id="in_mem_op" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">RAVLT Imediata:</span>
+              <input type="text" id="in_mem_imed" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">RAVLT Tardia:</span>
+              <input type="text" id="in_mem_tard" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] text-slate-400">RAVLT Reconhecimento:</span>
+              <input type="text" id="in_mem_rec" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Interpretação da Memória:</span>
+            <textarea id="in_mem_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
+          <label class="text-xs font-bold text-teal-300 block">5.5 Funções Executivas (Percentis)</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400">Planejamento (FCR-A):</span>
+              <input type="text" id="in_fe_plan" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Velocidade (IVP):</span>
+              <input type="text" id="in_fe_vel" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Controle Inibitório (FDT):</span>
+              <input type="text" id="in_fe_inib" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">Flexibilidade (FDT):</span>
+              <input type="text" id="in_fe_flex" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Interpretação das Funções Executivas:</span>
+            <textarea id="in_fe_interp" rows="3" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
+          <label class="text-xs font-bold text-teal-300 block">5.6 Visuoespaciais (Percentis)</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400">FCR-A (Visuoconstrução):</span>
+              <input type="text" id="in_ve_fcra" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">IOP WAIS (Visuopercepção):</span>
+              <input type="text" id="in_ve_iop" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Interpretação Visuoespacial:</span>
+            <textarea id="in_ve_interp" rows="2" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/80 p-3 rounded border border-slate-700 space-y-2">
+          <label class="text-xs font-bold text-teal-300 block">5.7 Linguagem (Percentis)</label>
+          <div class="grid grid-cols-3 gap-1.5 text-xs">
+            <div>
+              <span class="text-[10px] text-slate-400">Escala Verbal (QIV):</span>
+              <input type="text" id="in_lg_qiv" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">FAS Nominal:</span>
+              <input type="text" id="in_lg_nom" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400">FAS Categórica:</span>
+              <input type="text" id="in_lg_cat" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-white">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400">Interpretação da Linguagem:</span>
+            <textarea id="in_lg_interp" rows="2" oninput="renderizar()" class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-xs text-white"></textarea>
+          </div>
         </div>
 
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1">5.8 Personalidade e Comportamento / Escalas</label>
-          <textarea id="in_personalidade" rows="5" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole a análise de comportamento, Pfister, HTP, BDEFS..."></textarea>
+          <textarea id="in_personalidade" rows="5" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500"></textarea>
         </div>
 
         <div class="bg-teal-950/40 p-3 rounded border border-teal-800">
           <label class="text-xs font-bold text-teal-300 block mb-1">6. Conclusão Clínica (Página Nova Automática)</label>
-          <textarea id="in_conclusao" rows="6" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Cole a conclusão clínica..."></textarea>
+          <textarea id="in_conclusao" rows="6" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500"></textarea>
           
           <label class="text-xs font-bold text-teal-300 block mt-2 mb-1">Diagnóstico / CID-11 em Destaque</label>
-          <input type="text" id="in_cid" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="Ex: CID-11: 6A05.0 – Transtorno do Déficit de Atenção...">
+          <input type="text" id="in_cid" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-teal-500">
         </div>
 
         <div>
           <label class="text-xs font-medium text-slate-300 block mb-1">7. Encaminhamentos</label>
-          <textarea id="in_encaminhamentos" rows="5" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500" placeholder="1. Acompanhamento psicológico...&#10;2. Avaliação médica..."></textarea>
+          <textarea id="in_encaminhamentos" rows="5" oninput="renderizar()" class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-xs text-white focus:outline-none focus:border-teal-500"></textarea>
         </div>
       </div>
     </aside>
 
-    <!-- PREVIEW AO VIVO DO LAUDO (DIREITA) -->
     <section id="preview-pane" class="flex-1 bg-slate-950 overflow-y-auto p-8 flex justify-center">
       
       <div class="document-wrapper doc-content">
 
-        <!-- ============================================== -->
-        <!-- PÁGINA 1: CAPA                                 -->
-        <!-- ============================================== -->
+        <!-- PÁGINA 1: CAPA -->
         <div class="cover-page">
           <div class="pt-8 flex flex-col items-center">
-            <!-- Logotipo Helenara Chaves -->
             <svg class="h-28 w-auto" viewBox="0 0 450 160" fill="none" xmlns="http://www.w3.org/2000/svg">
               <line x1="35" y1="20" x2="35" y2="140" stroke="#000000" stroke-width="3.5"/>
               <line x1="15" y1="62" x2="190" y2="62" stroke="#000000" stroke-width="3.5"/>
@@ -395,9 +524,7 @@
           </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- PÁGINA 2: IDENTIFICAÇÃO                        -->
-        <!-- ============================================== -->
+        <!-- PÁGINA 2: IDENTIFICAÇÃO -->
         <div class="page-break-top contracapa-page">
           <div>
             <div class="print-header">
@@ -433,9 +560,7 @@
           </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- PÁGINA 3 EM DIANTE: FLUXO CONTÍNUO             -->
-        <!-- ============================================== -->
+        <!-- PÁGINA 3 EM DIANTE: MIOLO -->
         <div class="page-break-top">
           <div class="print-header">
             <span>HELENARA CHAVES</span>
@@ -509,20 +634,266 @@
             5. RESULTADOS
           </div>
 
+          <!-- 5.1 APRESENTAÇÃO -->
           <div class="content-block">
             <div class="sub-heading">5.1 APRESENTAÇÃO DURANTE A AVALIAÇÃO</div>
             <div id="out_apresentacao"></div>
           </div>
 
+          <!-- 5.2 QI -->
+          <div class="content-block">
+            <div class="sub-heading">5.2 QUOCIENTE INTELECTUAL</div>
+            <p class="font-bold mb-1 text-[10.5pt]">Foi possível constatar:</p>
+            <table class="laudo-table">
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Teste</th>
+                  <th>Percentil</th>
+                  <th>Classificação</th>
+                  <th>Interpretação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">QIT</td>
+                  <td class="center">WAIS</td>
+                  <td class="center font-bold" id="out_qit_perc">--</td>
+                  <td class="center" id="out_qit_class">--</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Interpretação:</strong> <span id="out_qi_interp"></span></p>
+          </div>
+
+          <!-- 5.3 ATENÇÃO -->
+          <div class="content-block">
+            <div class="sub-heading">5.3 HABILIDADES ATENCIONAIS</div>
+            <p class="font-bold mb-1 text-[10.5pt]">Foi possível constatar:</p>
+            <table class="laudo-table">
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Teste</th>
+                  <th>Percentil</th>
+                  <th>Classificação</th>
+                  <th>Interpretação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">Atenção Concentrada</td>
+                  <td class="center">BPA</td>
+                  <td class="center font-bold" id="out_at_conc">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Atenção Dividida</td>
+                  <td class="center">BPA</td>
+                  <td class="center font-bold" id="out_at_div">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Atenção Alternada</td>
+                  <td class="center">BPA</td>
+                  <td class="center font-bold" id="out_at_alt">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Interpretação:</strong> <span id="out_at_interp"></span></p>
+          </div>
+
+          <!-- 5.4 MEMÓRIA -->
+          <div class="content-block">
+            <div class="sub-heading">5.4 HABILIDADES DE MEMÓRIA</div>
+            <p class="font-bold mb-1 text-[10.5pt]">Foi possível constatar:</p>
+            <table class="laudo-table">
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Teste</th>
+                  <th>Percentil</th>
+                  <th>Classificação</th>
+                  <th>Interpretação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">Memória Visual Imediata</td>
+                  <td class="center">FCR-A</td>
+                  <td class="center font-bold" id="out_mem_vis">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Memória Operacional</td>
+                  <td class="center">IMO do WISC-IV</td>
+                  <td class="center font-bold" id="out_mem_op">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Memória Episódica Verbal (Imediata)</td>
+                  <td class="center">RAVLT</td>
+                  <td class="center font-bold" id="out_mem_imed">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Memória Episódica Verbal (Tardia)</td>
+                  <td class="center">RAVLT</td>
+                  <td class="center font-bold" id="out_mem_tard">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Memória Episódica Verbal (Reconhecimento)</td>
+                  <td class="center">RAVLT</td>
+                  <td class="center font-bold" id="out_mem_rec">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Interpretação:</strong> <span id="out_mem_interp"></span></p>
+          </div>
+
+          <!-- 5.5 FUNÇÕES EXECUTIVAS -->
+          <div class="content-block">
+            <div class="sub-heading">5.5 FUNÇÕES EXECUTIVAS</div>
+            <p class="font-bold mb-1 text-[10.5pt]">Foi possível constatar:</p>
+            <table class="laudo-table">
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Teste</th>
+                  <th>Percentil</th>
+                  <th>Classificação</th>
+                  <th>Interpretação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">Planejamento e Organização</td>
+                  <td class="center">FCR-A</td>
+                  <td class="center font-bold" id="out_fe_plan">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Velocidade de Processamento</td>
+                  <td class="center">IVP do WISC-IV</td>
+                  <td class="center font-bold" id="out_fe_vel">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Controle Inibitório</td>
+                  <td class="center">FDT</td>
+                  <td class="center font-bold" id="out_fe_inib">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Flexibilidade Mental</td>
+                  <td class="center">FDT</td>
+                  <td class="center font-bold" id="out_fe_flex">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Interpretação:</strong> <span id="out_fe_interp"></span></p>
+          </div>
+
+          <!-- 5.6 VISUOESPACIAIS -->
+          <div class="content-block">
+            <div class="sub-heading">5.6 HABILIDADES VISUOESPACIAIS</div>
+            <p class="font-bold mb-1 text-[10.5pt]">Foi possível constatar:</p>
+            <table class="laudo-table">
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Teste</th>
+                  <th>Percentil</th>
+                  <th>Classificação</th>
+                  <th>Interpretação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">Perspectiva, orientação e visuoconstrução</td>
+                  <td class="center">FCR-A</td>
+                  <td class="center font-bold" id="out_ve_fcra">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Partes, orientação e visuopercepção</td>
+                  <td class="center">IOP do WAIS</td>
+                  <td class="center font-bold" id="out_ve_iop">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Interpretação:</strong> <span id="out_ve_interp"></span></p>
+          </div>
+
+          <!-- 5.7 LINGUAGEM -->
+          <div class="content-block">
+            <div class="sub-heading">5.7 HABILIDADES DE LINGUAGEM</div>
+            <p class="font-bold mb-1 text-[10.5pt]">Foi possível constatar:</p>
+            <table class="laudo-table">
+              <thead>
+                <tr>
+                  <th>Habilidade</th>
+                  <th>Teste</th>
+                  <th>Percentil</th>
+                  <th>Classificação</th>
+                  <th>Interpretação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="font-bold">Escala Verbal</td>
+                  <td class="center">QIV</td>
+                  <td class="center font-bold" id="out_lg_qiv">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Fluência Verbal Nominal</td>
+                  <td class="center">FAS</td>
+                  <td class="center font-bold" id="out_lg_nom">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+                <tr>
+                  <td class="font-bold">Fluência Verbal Categórica</td>
+                  <td class="center">FAS</td>
+                  <td class="center font-bold" id="out_lg_cat">--</td>
+                  <td class="center">Média</td>
+                  <td class="center font-bold text-teal-900">Habilidade Preservada</td>
+                </tr>
+              </tbody>
+            </table>
+            <p><strong>Interpretação:</strong> <span id="out_lg_interp"></span></p>
+          </div>
+
+          <!-- 5.8 PERSONALIDADE -->
           <div class="content-block">
             <div class="sub-heading">5.8 PERSONALIDADE, PSICOPATOLOGIA E COMPORTAMENTO</div>
             <div id="out_personalidade"></div>
           </div>
         </div>
 
-        <!-- ============================================== -->
-        <!-- PÁGINA: CONCLUSÃO (PÁGINA NOVA FORÇADA)        -->
-        <!-- ============================================== -->
+        <!-- PÁGINA: CONCLUSÃO (PÁGINA NOVA FORÇADA) -->
         <div class="page-break-top">
           <div class="print-header">
             <span>HELENARA CHAVES</span>
@@ -587,9 +958,7 @@
 
   </main>
 
-  <!-- SCRIPT DE PROCESSAMENTO AUTOMATIZADO -->
   <script>
-    // Converte texto bruto em parágrafos e listas estilizadas
     function formatarTextoBruto(raw) {
       if (!raw || !raw.trim()) return '';
       const linhas = raw.split('\n');
@@ -606,7 +975,6 @@
           return;
         }
 
-        // Se a linha começar com hífen, asterisco ou número com ponto
         if (l.startsWith('- ') || l.startsWith('* ')) {
           if (!emLista) {
             html += '<ul>';
@@ -626,31 +994,62 @@
       return html;
     }
 
-    // Renderiza o preview em tempo real
     function renderizar() {
+      // 1. Paciente
       const nome = document.getElementById('in_nome').value || 'Nome do Paciente';
-      const nasc = document.getElementById('in_nascimento').value || 'DD/MM/AAAA';
-      const idade = document.getElementById('in_idade').value || '-- anos';
-      const finalidade = document.getElementById('in_finalidade').value || 'Delinear perfil neuropsicológico.';
-      const dataEmissao = document.getElementById('in_data_emissao').value || 'Rio Branco, Acre';
-      const cid = document.getElementById('in_cid').value || 'Classificação pela CID-11: Não informado.';
-
       document.getElementById('out_nome').innerText = nome;
       document.querySelectorAll('.out_nome_short').forEach(el => el.innerText = nome);
-      document.getElementById('out_nascimento').innerText = nasc;
-      document.getElementById('out_idade').innerText = idade;
-      document.getElementById('out_finalidade').innerText = finalidade;
-      document.getElementById('out_data_emissao').innerText = dataEmissao;
-      document.getElementById('out_cid').innerText = cid;
+      document.getElementById('out_nascimento').innerText = document.getElementById('in_nascimento').value || 'DD/MM/AAAA';
+      document.getElementById('out_idade').innerText = document.getElementById('in_idade').value || '-- anos';
+      document.getElementById('out_finalidade').innerText = document.getElementById('in_finalidade').value || 'Delinear perfil neuropsicológico.';
+      document.getElementById('out_data_emissao').innerText = document.getElementById('in_data_emissao').value || 'Rio Branco, Acre';
+      document.getElementById('out_cid').innerText = document.getElementById('in_cid').value || 'Classificação pela CID-11: Não informado.';
 
+      // Textos Brutos
       document.getElementById('out_demanda').innerHTML = formatarTextoBruto(document.getElementById('in_demanda').value);
       document.getElementById('out_apresentacao').innerHTML = formatarTextoBruto(document.getElementById('in_apresentacao').value);
       document.getElementById('out_personalidade').innerHTML = formatarTextoBruto(document.getElementById('in_personalidade').value);
       document.getElementById('out_conclusao').innerHTML = formatarTextoBruto(document.getElementById('in_conclusao').value);
       document.getElementById('out_encaminhamentos').innerHTML = formatarTextoBruto(document.getElementById('in_encaminhamentos').value);
+
+      // 5.2 QI
+      document.getElementById('out_qit_perc').innerText = document.getElementById('in_qit_perc').value;
+      document.getElementById('out_qit_class').innerText = document.getElementById('in_qit_class').value;
+      document.getElementById('out_qi_interp').innerText = document.getElementById('in_qi_interp').value;
+
+      // 5.3 Atenção
+      document.getElementById('out_at_conc').innerText = document.getElementById('in_at_conc').value;
+      document.getElementById('out_at_div').innerText = document.getElementById('in_at_div').value;
+      document.getElementById('out_at_alt').innerText = document.getElementById('in_at_alt').value;
+      document.getElementById('out_at_interp').innerText = document.getElementById('in_at_interp').value;
+
+      // 5.4 Memória
+      document.getElementById('out_mem_vis').innerText = document.getElementById('in_mem_vis').value;
+      document.getElementById('out_mem_op').innerText = document.getElementById('in_mem_op').value;
+      document.getElementById('out_mem_imed').innerText = document.getElementById('in_mem_imed').value;
+      document.getElementById('out_mem_tard').innerText = document.getElementById('in_mem_tard').value;
+      document.getElementById('out_mem_rec').innerText = document.getElementById('in_mem_rec').value;
+      document.getElementById('out_mem_interp').innerText = document.getElementById('in_mem_interp').value;
+
+      // 5.5 Funções Executivas
+      document.getElementById('out_fe_plan').innerText = document.getElementById('in_fe_plan').value;
+      document.getElementById('out_fe_vel').innerText = document.getElementById('in_fe_vel').value;
+      document.getElementById('out_fe_inib').innerText = document.getElementById('in_fe_inib').value;
+      document.getElementById('out_fe_flex').innerText = document.getElementById('in_fe_flex').value;
+      document.getElementById('out_fe_interp').innerText = document.getElementById('in_fe_interp').value;
+
+      // 5.6 Visuoespacial
+      document.getElementById('out_ve_fcra').innerText = document.getElementById('in_ve_fcra').value;
+      document.getElementById('out_ve_iop').innerText = document.getElementById('in_ve_iop').value;
+      document.getElementById('out_ve_interp').innerText = document.getElementById('in_ve_interp').value;
+
+      // 5.7 Linguagem
+      document.getElementById('out_lg_qiv').innerText = document.getElementById('in_lg_qiv').value;
+      document.getElementById('out_lg_nom').innerText = document.getElementById('in_lg_nom').value;
+      document.getElementById('out_lg_cat').innerText = document.getElementById('in_lg_cat').value;
+      document.getElementById('out_lg_interp').innerText = document.getElementById('in_lg_interp').value;
     }
 
-    // Carrega o exemplo da Jucenilda com 1 clique
     function carregarExemplo() {
       document.getElementById('in_nome').value = 'Jucenilda Lima de Araújo';
       document.getElementById('in_nascimento').value = '10/03/1986';
@@ -668,44 +1067,3 @@ Relatou ainda episódios de hiperfoco, nos quais direciona intensa atenção e e
 
       document.getElementById('in_apresentacao').value = 
 `Durante a avaliação neuropsicológica, a paciente estabeleceu vínculo adequado com a avaliadora e respondeu aos questionamentos apresentados. Ao longo da aplicação dos testes e entrevistas, observou-se lentidão no processamento das informações, com necessidade de maior tempo para compreender instruções, organizar respostas e concluir as atividades propostas.
-
-Foram identificadas dificuldades relacionadas à manutenção da atenção, concentração e organização do pensamento, com episódios de distraibilidade e perda do foco durante a execução das tarefas. Em alguns momentos, houve necessidade de repetição das instruções e redirecionamento da atenção para a atividade em andamento.`;
-
-      document.getElementById('in_personalidade').value = 
-`No teste HTP, identificaram-se retraimento, insegurança e autoimagem rebaixada frente a pressões socioambientais. No Teste das Pirâmides Coloridas de Pfister, evidenciou-se ansiedade difusa, temor de desamparo e sobrecarga emocional interna, com potencial para reações impulsivas ou inibitórias na conclusão de tarefas rotineiras, mantendo desenvolvimento intelectual preservado.
-
-Avaliação de Disfunções Executivas (BDEFS):
-- Desatenção aos detalhes: dificuldade para manter a atenção em informações relevantes, cometendo erros por descuido.
-- Procrastinação executiva: dificuldade para iniciar, manter e concluir tarefas.
-- Gestão do tempo: prejuízos severos na mensuração e cumprimento de prazos.
-- Dificuldade para lidar com múltiplas demandas simultâneas.`;
-
-      document.getElementById('in_conclusao').value = 
-`A avaliação neuropsicológica teve como objetivo investigar a presença de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), considerando as dificuldades relatadas pela paciente ao longo de sua trajetória de vida.
-
-Na avaliação do funcionamento intelectual, a paciente apresentou Quociente de Inteligência Total (QIT = 90), situado na faixa média. Nas tarefas específicas de memória, linguagem, habilidades visuoperceptivas e funções executivas estruturadas, os resultados situaram-se na faixa média.
-
-Durante a avaliação clínica, foram observadas distraibilidade, oscilação atencional, lentidão no processamento e necessidade de reorientação contínua. Tais fatores, associados ao histórico de vida e aos prejuízos funcionais diários, corroboram o quadro clínico.
-
-Diante dos dados clínicos, comportamentais e psicométricos, o perfil é compatível com a hipótese diagnóstica de Transtorno do Déficit de Atenção e Hiperatividade (TDAH), apresentação predominantemente desatenta.`;
-
-      document.getElementById('in_encaminhamentos').value = 
-`- 1. Acompanhamento psicológico: treino de autorregulação e manejo da desatenção.
-- 2. Avaliação médica psiquiátrica: investigar conduta psicofarmacológica.
-- 3. Treino de funções executivas: foco em planejamento e cumprimento de prazos.
-- 4. Estratégias compensatórias: alarmes, agendas visuais e organizadores externos.
-- 5. Psicoeducação familiar e individual sobre o neurodesenvolvimento no TDAH adulto.`;
-
-      renderizar();
-    }
-
-    function limparCampos() {
-      document.querySelectorAll('input, textarea').forEach(el => el.value = '');
-      renderizar();
-    }
-
-    // Inicialização
-    window.addEventListener('DOMContentLoaded', carregarExemplo);
-  </script>
-</body>
-</html>
